@@ -80,37 +80,23 @@ void PokeBox::reset()
 // This used to load our data in from an array
 void PokeBox::loadData(int generation, Language nLang, const byte nDataArray[])
 {
-    switch (nLang)
-    {
-    case ENGLISH:
-        break;
-    case FRENCH:
-        break;
-    case ITALIAN:
-        break;
-    case GERMAN:
-        break;
-    case SPANISH:
-        break;
-    default:
-        return;
-    }
     for (int pkmnIndex = 0; pkmnIndex < nDataArray[0]; pkmnIndex++)
     {
         GBPokemon *newPkmn = nullptr;
         if (generation == 1)
         {
-            newPkmn = new Gen1Pokemon(table);
+            newPkmn = new Gen1Pokemon(nLang, table);
         }
         else if (generation == 2)
         {
-            newPkmn = new Gen2Pokemon(table);
+            newPkmn = new Gen2Pokemon(nLang, table);
         }
 
+        int maxPkmn = (nLang == JAPANESE) ? 30 : 20;
         int externalIDOffset = 1;
-        int dataOffset = externalIDOffset + (20 * 1) + 1;
-        int trainerNameOffset = dataOffset + (20 * newPkmn->dataArraySize);
-        int nicknameOffset = trainerNameOffset + (20 * newPkmn->OTArraySize);
+        int dataOffset = externalIDOffset + (maxPkmn * 1) + 1;
+        int trainerNameOffset = dataOffset + (maxPkmn * newPkmn->dataArraySize);
+        int nicknameOffset = trainerNameOffset + (maxPkmn * newPkmn->OTArraySize);
 
         externalIDOffset += pkmnIndex * 1;
         dataOffset += pkmnIndex * newPkmn->dataArraySize;

@@ -13,7 +13,7 @@ protected:
     byte nicknameArray[11];
     byte OTArray[11];
     byte externalIndexNumber;
-    Language lang = (Language)0;
+    Language lang = LANGUAGE_UNKNOWN;
 
     static const DataVarInfo
         // All of the data info variables

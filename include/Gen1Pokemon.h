@@ -6,7 +6,7 @@
 class Gen1Pokemon : public GBPokemon // The class for gen 1 Pokemon
 {
 public:
-    Gen1Pokemon(PokemonTables *table);
+    Gen1Pokemon(Language nLang, PokemonTables *table);
     byte dataArray[33];
 
     /**

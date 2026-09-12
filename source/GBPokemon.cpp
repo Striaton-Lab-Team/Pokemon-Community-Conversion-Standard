@@ -9,9 +9,7 @@
 GBPokemon::GBPokemon()
 {
     nicknameArrayPtr = nicknameArray;
-    nicknameArraySize = 11;
     OTArrayPtr = OTArray;
-    OTArraySize = 11;
     externalIndexNumberPtr = &externalIndexNumber;
     isBigEndian = true;
     generation = 0;

@@ -6,7 +6,7 @@
 class Gen2Pokemon : public GBPokemon // The class for gen 2 Pokemon
 {
 public:
-    Gen2Pokemon(PokemonTables *table, bool isPartyPkmn = false);
+    Gen2Pokemon(Language nLang, PokemonTables *table, bool isPartyPkmn = false);
     byte dataArray[32];
 
     u32 getCurrentHP() { return getVar(g2_currentHP); }

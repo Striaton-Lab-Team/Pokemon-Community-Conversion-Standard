@@ -1,11 +1,22 @@
 #include "Gen2Pokemon.h"
 
-Gen2Pokemon::Gen2Pokemon(PokemonTables *table, bool isPartyPkmn)
+Gen2Pokemon::Gen2Pokemon(Language nLang, PokemonTables *table, bool isPartyPkmn)
 {
     pokeTable = table;
     dataArrayPtr = dataArray;
     dataArraySize = isPartyPkmn ? 48 : 32;
     generation = 2;
+        
+    if (nLang == JAPANESE)
+    {
+        nicknameArraySize = 6;
+        OTArraySize = 6;
+    }
+    else
+    {
+        nicknameArraySize = 11;
+        OTArraySize = 11;
+    }
 }
 
 #if ON_GBA
