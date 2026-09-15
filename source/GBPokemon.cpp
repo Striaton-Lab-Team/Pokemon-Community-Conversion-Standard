@@ -146,7 +146,7 @@ byte GBPokemon::getUnownLetter()
         letter = letter / 10;
         return letter;
     }
-    return 255;
+    return ANY_VALUE;
 }
 
 Gender GBPokemon::getGender()
@@ -173,13 +173,18 @@ Nature GBPokemon::getVirtualConsoleNature()
     return (Nature)(getExpPoints() % 25);
 }
 
+Nature GBPokemon::getPsudoRandomNature()
+{
+    return (Nature)(getNextPseudoRandomNumber() % 25);
+}
+
 bool GBPokemon::getIsShiny()
 {
     return ((getDV(ATTACK) & 0b0010) == 0b0010) && getDV(DEFENSE) == 10 &&
            getDV(SPEED) == 10 && getDV(SPECIAL) == 10;
 }
 
-bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, bool sanitizeMythicals)
+bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, bool sanitizeMythicals=false)
 {
     if (!isValid)
     {
@@ -189,8 +194,8 @@ bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, bool sanitizeMythicals)
     bool valid =
         // Start with things that effect the PID
         convertSpeciesIndexNumber(newPkmn) && setRequestedLetter(newPkmn) &&
-        setRequestedNature(newPkmn) && setRequestedGender(newPkmn) &&
-        setRequestedAbility(newPkmn) && setRequestedSize(newPkmn) &&
+        setRequestedNature(newPkmn, method) && setRequestedGender(newPkmn) &&
+        setRequestedAbility(newPkmn, method) && setRequestedSize(newPkmn, method) &&
 
         // Then set the PID
         generatePersonalityValue(newPkmn, ABCD_U) &&
@@ -199,30 +204,47 @@ bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, bool sanitizeMythicals)
         convertTrainerID(newPkmn) && convertNickname(newPkmn) &&
         convertLanguage(newPkmn) && convertMiscFlags(newPkmn) &&
         convertTrainerNickname(newPkmn) && convertMarkings(newPkmn) &&
-        convertItem(newPkmn) && convertEXP(newPkmn) &&
-        convertFriendship(newPkmn) && convertMoves(newPkmn) &&
-        convertEVs(newPkmn) && convertContestConditions(newPkmn) &&
-        convertPokerus(newPkmn) && convertMetLocation(newPkmn) &&
-        convertMetLevel(newPkmn) && convertGameOfOrigin(newPkmn) &&
-        convertPokeball(newPkmn) && convertTrainerGender(newPkmn) &&
-        convertIVs(newPkmn) && convertRibbonsAndObedience(newPkmn) &&
+        convertItem(newPkmn) && convertEXP(newPkmn, method) &&
+        convertFriendship(newPkmn) && convertMoves(newPkmn, method) &&
+        convertEVs(newPkmn, method) && convertContestConditions(newPkmn) &&
+        convertPokerus(newPkmn, method) && convertMetLocation(newPkmn, method) &&
+        convertMetLevel(newPkmn) && convertGameOfOrigin(newPkmn, method) &&
+        convertPokeball(newPkmn) && convertTrainerGender(newPkmn, method) &&
+        convertIVs(newPkmn, method) && convertRibbonsAndObedience(newPkmn) &&
         convertShininess(newPkmn);
 
-    if (sanitizeMythicals &&
-        (getSpeciesIndexNumber() == MEW || getSpeciesIndexNumber() == CELEBI))
+    if ((getSpeciesIndexNumber() == MEW || getSpeciesIndexNumber() == CELEBI))
     {
-        // Modify the required data for the event
-        valid &= loadEvent(newPkmn);
+        switch (method)
+        {
+            case FAITHFUL:
+                sanitizeMythicals = false;
+            break;
+            case LEGAL:
+            case VIRTUAL:
+                sanitizeMythicals = true;
+            break;
+
+            default:
+                // Use the sanitize variable that was passed in
+            break;
+        }
+    
+        if (sanitizeMythicals)
+        {
+            // Modify the required data for the event
+            valid &= loadEvent(newPkmn, method);
+        }
     }
 
     newPkmn->isValid = valid;
     return valid;
 };
 
-bool GBPokemon::loadEvent(Gen3Pokemon *newPkmn)
+bool GBPokemon::loadEvent(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
     bool valid = generatePersonalityValue(newPkmn, BACD_R) &&
-                 convertEVs(newPkmn) && convertIVs(newPkmn);
+                 convertEVs(newPkmn, method) && convertIVs(newPkmn, method);
     if (!valid)
     {
         return false;
@@ -491,41 +513,61 @@ bool GBPokemon::convertItem(Gen3Pokemon *newPkmn)
     return true;
 }
 
-bool GBPokemon::convertEXP(Gen3Pokemon *newPkmn)
+bool GBPokemon::convertEXP(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
     // As per Poke Transporter, the level will be based on the level value, not
-    // the EXP Make sure Level is not over 100
-
+    // the EXP 
+    
+    // Make sure Level is not over 100
     int speciesIndex = getSpeciesIndexNumber();
     int currLevel = getLevel();
+    bool truncateEXP = false;
+
+    switch(method)
+    {
+        case VIRTUAL:
+        default:
+            truncateEXP = true;
+        break;
+
+        case FAITHFUL:
+        case LEGAL:
+            truncateEXP = false;
+        break;
+    }
+
     if (currLevel > 100)
     {
         currLevel = 100;
+        truncateEXP = true;
     }
-
-    // Truncate the EXP down to the current level
-    pokeTable->load_exp_groups();
-    switch (pokeTable->EXP_GROUPS[speciesIndex])
+    
+    if (truncateEXP)
     {
-    case EXP_FAST:
-        newPkmn->setExpPoints((4 * (currLevel * currLevel * currLevel)) / 5);
-        break;
+        // Truncate the EXP down to the current level
+        pokeTable->load_exp_groups();
+        switch (pokeTable->EXP_GROUPS[speciesIndex])
+        {
+        case EXP_FAST:
+            newPkmn->setExpPoints((4 * (currLevel * currLevel * currLevel)) / 5);
+            break;
 
-    default: // MissingNo is the only one that should hit default, so match it
-             // to Porygon
-    case EXP_MED_FAST:
-        newPkmn->setExpPoints(currLevel * currLevel * currLevel);
-        break;
+        default: // MissingNo is the only one that should hit default, so match it
+                // to Porygon
+        case EXP_MED_FAST:
+            newPkmn->setExpPoints(currLevel * currLevel * currLevel);
+            break;
 
-    case EXP_MED_SLOW:
-        newPkmn->setExpPoints(((6 * currLevel * currLevel * currLevel) / 5) -
-                              (15 * currLevel * currLevel) + (100 * currLevel) -
-                              140);
-        break;
+        case EXP_MED_SLOW:
+            newPkmn->setExpPoints(((6 * currLevel * currLevel * currLevel) / 5) -
+                                (15 * currLevel * currLevel) + (100 * currLevel) -
+                                140);
+            break;
 
-    case EXP_SLOW:
-        newPkmn->setExpPoints((5 * (currLevel * currLevel * currLevel)) / 4);
-        break;
+        case EXP_SLOW:
+            newPkmn->setExpPoints((5 * (currLevel * currLevel * currLevel)) / 4);
+            break;
+        }
     }
     return true;
 };
@@ -536,57 +578,70 @@ bool GBPokemon::convertFriendship(Gen3Pokemon *newPkmn)
     return true;
 }
 
-bool GBPokemon::convertMoves(Gen3Pokemon *newPkmn)
+bool GBPokemon::convertMoves(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
-    Species speciesIndexNum = (Species)getSpeciesIndexNumber();
-    // Check that the moves are valid
-    if ((speciesIndexNum != SMEARGLE) && (speciesIndexNum != MISSINGNO) &&
-        (speciesIndexNum != TREECKO)) // Ignore Smeargle, MissingNo, and Treecko
+
+    switch(method)
     {
-        for (int i = 0; i < 4; i++)
-        {
-            if (pokeTable->can_learn_move(speciesIndexNum, getMove(i)))
+        case LEGAL:
+        default:
+
+            Species speciesIndexNum = (Species)getSpeciesIndexNumber();
+            // Check that the moves are valid
+            if ((speciesIndexNum != SMEARGLE) && (speciesIndexNum != MISSINGNO) &&
+                (speciesIndexNum != TREECKO)) // Ignore Smeargle, MissingNo, and Treecko
             {
-                newPkmn->setMove(i, getMove(i));       // Add the move
-                newPkmn->setPPUpNum(i, getPPUpNum(i)); // Add the PP Bonuses
+                for (int i = 0; i < 4; i++)
+                {
+                    if (pokeTable->can_learn_move(speciesIndexNum, getMove(i)))
+                    {
+                        newPkmn->setMove(i, getMove(i));       // Add the move
+                        newPkmn->setPPUpNum(i, getPPUpNum(i)); // Add the PP Bonuses
+                    }
+                }
             }
-        }
-    }
 
-    // Make sure it has at least one move
-    int count = 0;
-    for (int i = 0; i < 4; i++)
-    {
-        count += (newPkmn->getMove(i) != 0);
-    }
-    if (count == 0)
-    {
-        newPkmn->setMove(0, pokeTable->get_earliest_move(speciesIndexNum));
-    }
-
-    // Bubble valid moves to the top
-    int i, j;
-    bool swapped;
-    for (i = 0; i < 3; i++)
-    {
-        swapped = false;
-        for (j = 0; j < 3 - i; j++)
-        {
-            if (newPkmn->getMove(j) == 0 && newPkmn->getMove(j + 1) != 0)
+            // Make sure it has at least one move
+            int count = 0;
+            for (int i = 0; i < 4; i++)
             {
-                // Move the move *and* PP bonus up if there is a blank space
-                newPkmn->setMove(j, newPkmn->getMove(j + 1));
-                newPkmn->setPPUpNum(j, newPkmn->getPPUpNum(j + 1));
-                newPkmn->setMove(j + 1, 0);
-                newPkmn->setPPUpNum(j + 1, 0);
-                swapped = true;
+                count += (newPkmn->getMove(i) != 0);
             }
-        }
+            if (count == 0)
+            {
+                newPkmn->setMove(0, pokeTable->get_earliest_move(speciesIndexNum));
+            }
 
-        // If no two elements were swapped
-        // by inner loop, then break
-        if (swapped == false)
-            break;
+            // Bubble valid moves to the top
+            int i, j;
+            bool swapped;
+            for (i = 0; i < 3; i++)
+            {
+                swapped = false;
+                for (j = 0; j < 3 - i; j++)
+                {
+                    if (newPkmn->getMove(j) == 0 && newPkmn->getMove(j + 1) != 0)
+                    {
+                        // Move the move *and* PP bonus up if there is a blank space
+                        newPkmn->setMove(j, newPkmn->getMove(j + 1));
+                        newPkmn->setPPUpNum(j, newPkmn->getPPUpNum(j + 1));
+                        newPkmn->setMove(j + 1, 0);
+                        newPkmn->setPPUpNum(j + 1, 0);
+                        swapped = true;
+                    }
+                }
+
+                // If no two elements were swapped
+                // by inner loop, then break
+                if (swapped == false)
+                    break;
+            }
+        break;
+
+        case FAITHFUL:
+        case VIRTUAL:
+            // Keep all the moves
+        break;
     }
 
     // Restore the PP values
@@ -602,13 +657,27 @@ bool GBPokemon::convertMoves(Gen3Pokemon *newPkmn)
     return true;
 };
 
-bool GBPokemon::convertEVs(Gen3Pokemon *newPkmn)
+bool GBPokemon::convertEVs(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
-    for (int i = 0; i < 6; i++)
+    switch(method)
     {
-        newPkmn->setEV((Stat)i, 0);
+        case VIRTUAL:
+        default:
+            for (int i = 0; i < 6; i++)
+            {
+                newPkmn->setEV((Stat)i, 0);
+            }
+        return true;
+        
+        case FAITHFUL:
+        case LEGAL:
+            // TODO: Stat EXP calcs!
+            for (int i = 0; i < 6; i++)
+            {
+                newPkmn->setEV((Stat)i, 0);
+            }
+        return true;
     }
-    return true;
 };
 
 bool GBPokemon::convertContestConditions(Gen3Pokemon *newPkmn)
@@ -621,17 +690,39 @@ bool GBPokemon::convertContestConditions(Gen3Pokemon *newPkmn)
     return true;
 };
 
-bool GBPokemon::convertPokerus(Gen3Pokemon *newPkmn)
+bool GBPokemon::convertPokerus(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
-    newPkmn->setPokerusStrain(getPokerusStrain());
-    newPkmn->setPokerusDaysRemaining(getPokerusDaysRemaining());
-    return true;
+    switch (method)
+    {
+        case FAITHFUL:
+        case LEGAL:
+        default:
+            newPkmn->setPokerusStrain(getPokerusStrain());
+            newPkmn->setPokerusDaysRemaining(getPokerusDaysRemaining());
+        return true;
+
+        case VIRTUAL:
+            newPkmn->setPokerusStrain(0);
+            newPkmn->setPokerusDaysRemaining(0);
+        return true;
+    }
 }
 
-bool GBPokemon::convertMetLocation(Gen3Pokemon *newPkmn)
+bool GBPokemon::convertMetLocation(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
-    newPkmn->setMetLocation(0xFF); // A fateful encounter
-    return true;
+    switch(method)
+    {
+        case FAITHFUL:
+        case VIRTUAL:
+        default:
+            newPkmn->setMetLocation(0xFF); // A fateful encounter
+        return true;
+        
+        case LEGAL:
+            // TODO: do met location shenanigans
+            newPkmn->setMetLocation(0xFF);
+        return true;
+    }
 }
 
 bool GBPokemon::convertMetLevel(Gen3Pokemon *newPkmn)
@@ -640,22 +731,27 @@ bool GBPokemon::convertMetLevel(Gen3Pokemon *newPkmn)
     return true;
 }
 
-bool GBPokemon::convertGameOfOrigin(Gen3Pokemon *newPkmn)
+bool GBPokemon::convertGameOfOrigin(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
-    switch (generation)
+    switch(method)
     {
-    case 1:
-        newPkmn->setGameOfOrigin(FIRERED);
-        break;
+        case LEGAL:
+            newPkmn->setGameOfOrigin(FIRERED);
+        return true;
 
-    case 2:
-        newPkmn->setGameOfOrigin(HEARTGOLD);
-        break;
-
-    default:
-        return false;
+        case FAITHFUL:
+        case VIRTUAL:
+        default:
+            if (generation == 2)
+            {
+                newPkmn->setGameOfOrigin(HEARTGOLD);
+            }
+            else
+            {
+                newPkmn->setGameOfOrigin(FIRERED);
+            }
+        return true;
     }
-    return true;
 }
 
 bool GBPokemon::convertPokeball(Gen3Pokemon *newPkmn)
@@ -672,14 +768,25 @@ bool GBPokemon::convertPokeball(Gen3Pokemon *newPkmn)
     return true;
 }
 
-bool GBPokemon::convertTrainerGender(Gen3Pokemon *newPkmn)
+bool GBPokemon::convertTrainerGender(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
-    newPkmn->setOriginalTrainerGender(getCaughtDataGender());
-    return true;
+    switch(method)
+    {
+        case VIRTUAL:
+            newPkmn->setOriginalTrainerGender(0);
+        return true;
+
+        case FAITHFUL:
+        case LEGAL:
+        default:
+            newPkmn->setOriginalTrainerGender(getCaughtDataGender());
+        return true;
+    }
 };
 
-bool GBPokemon::convertIVs(Gen3Pokemon *newPkmn)
+bool GBPokemon::convertIVs(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
+    // TODO: All this jazz
     u16 currRand;
 
     currRand = newPkmn->getNextRand_u16();
@@ -716,10 +823,20 @@ bool GBPokemon::setRequestedLetter(Gen3Pokemon *newPkmn)
     return true;
 };
 
-bool GBPokemon::setRequestedNature(Gen3Pokemon *newPkmn)
+bool GBPokemon::setRequestedNature(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
-    newPkmn->internalNature = getVirtualConsoleNature();
-    return true;
+    switch(method)
+    {
+        case FAITHFUL:
+        case LEGAL:
+        default:
+            newPkmn->internalNature = ANY_NATURE;
+        return true;
+
+        case VIRTUAL:
+            newPkmn->internalNature = getVirtualConsoleNature();
+        return true;
+    }
 };
 
 bool GBPokemon::setRequestedGender(Gen3Pokemon *newPkmn)
@@ -728,17 +845,52 @@ bool GBPokemon::setRequestedGender(Gen3Pokemon *newPkmn)
     return true;
 };
 
-bool GBPokemon::setRequestedAbility(Gen3Pokemon *newPkmn)
+bool GBPokemon::setRequestedAbility(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
-    newPkmn->internalAbility = 255;
-    return true;
+    switch(method)
+    {
+        case VIRTUAL:
+            newPkmn->internalAbility = 0;
+        return true;
+
+        case FAITHFUL:
+        case LEGAL:
+        default:
+            newPkmn->internalAbility = ANY_VALUE;
+        return true;
+    }
 };
 
-bool GBPokemon::setRequestedSize(Gen3Pokemon *newPkmn)
+bool GBPokemon::setRequestedSize(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
-    newPkmn->internalSize = 255;
-    return true;
+    switch(method)
+    {
+        case FAITHFUL:
+        case LEGAL:
+            if (newPkmn->getSpeciesIndexNumber() == MAGIKARP)
+            {
+                newPkmn->internalSize = 0; // TODO: funny Magikarp conversion
+                return true;
+            }
+        case VIRTUAL:
+        default:
+            newPkmn->internalSize = ANY_VALUE;
+        return true;
+    }
+
 };
+
+byte GBPokemon::getNextPseudoRandomNumber()
+{
+    // TODO: ACTUALLY MAKE THIS RANDOM
+    return 0;
+}
+
+byte GBPokemon::getNextTrulyRandomNumber()
+{
+    // TODO: ACTUALLY MAKE THIS RANDOM
+    return 0;
+}
 
 bool GBPokemon::convertShininess(Gen3Pokemon *newPkmn)
 {

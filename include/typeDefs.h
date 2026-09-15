@@ -120,6 +120,7 @@ enum Gender
 
 enum Nature
 {
+    ANY_NATURE = -1,
     HARDY,
     LONELY,
     BRAVE,
@@ -689,6 +690,14 @@ enum class Endianness
     READ_AS_IS,
     LITTLE,
     BIG
+};
+
+enum ConversionMethod
+{
+    ORIGINAL = -1, // Original should NOT be refrenced in the conversion checks, it just represents the default.
+    FAITHFUL,
+    LEGAL,
+    VIRTUAL,
 };
 
 #endif

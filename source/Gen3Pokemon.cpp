@@ -315,12 +315,16 @@ byte Gen3Pokemon::getUnownLetter()
     }
     else
     {
-        return 255;
+        return ANY_VALUE;
     }
 };
 
 Nature Gen3Pokemon::getNature()
 {
+    if (internalNature == ANY_NATURE)
+    {
+        return ANY_NATURE;
+    }
     return (Nature)(getPersonalityValue() % 25);
 };
 
@@ -348,16 +352,20 @@ Gender Gen3Pokemon::getGender()
 
 int Gen3Pokemon::getAbilityFromPersonalityValue()
 {
-    if (internalAbility == 255)
+    if (internalAbility == ANY_VALUE)
     {
-        return 255;
+        return ANY_VALUE;
     }
     return getPersonalityValue() & 0b1;
 }
 
 int Gen3Pokemon::getSize()
 {
-    return 255;
+    if (internalSize == ANY_VALUE)
+    {
+        return ANY_VALUE;
+    }
+    return getSize();
 }
 
 bool Gen3Pokemon::getIsShiny()

@@ -27,6 +27,9 @@ public:
     int internalSize;
     int internalAbility;
 
+    // This is used to set an internal value to "anything"
+    #define ANY_VALUE -1
+
 protected:
     // These store the data bytes
     byte dataArray[80] = {0};
