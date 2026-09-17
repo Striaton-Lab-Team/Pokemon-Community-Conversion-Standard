@@ -123,6 +123,7 @@ enum Gender
 
 enum Nature
 {
+    NEUTRAL_NATURE = -2,
     ANY_NATURE = -1,
     HARDY,
     LONELY,

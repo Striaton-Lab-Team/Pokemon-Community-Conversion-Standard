@@ -325,6 +325,13 @@ Nature Gen3Pokemon::getNature()
     {
         return ANY_NATURE;
     }
+    if (internalNature == NEUTRAL_NATURE)
+    {
+        if ((Nature)(getPersonalityValue() % 25) % 6 == 0)
+        {
+            return NEUTRAL_NATURE;
+        }
+    }
     return (Nature)(getPersonalityValue() % 25);
 };
 
