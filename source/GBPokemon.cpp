@@ -134,7 +134,7 @@ bool GBPokemon::setDV(Stat currStat, byte newVal)
     }
 }
 
-byte GBPokemon::getUnownLetter()
+UnownLetter GBPokemon::getUnownLetter()
 {
     if (getSpeciesIndexNumber() == 201)
     {
@@ -144,9 +144,9 @@ byte GBPokemon::getUnownLetter()
         letter |= ((getDV(SPEED) & 0b0110) >> 1) << 2;
         letter |= ((getDV(SPECIAL) & 0b0110) >> 1) << 0;
         letter = letter / 10;
-        return letter;
+        return (UnownLetter)letter;
     }
-    return ANY_VALUE;
+    return NO_LETTER;
 }
 
 Gender GBPokemon::getGender()
@@ -184,7 +184,7 @@ bool GBPokemon::getIsShiny()
            getDV(SPEED) == 10 && getDV(SPECIAL) == 10;
 }
 
-bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, bool sanitizeMythicals=false)
+bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, bool sanitizeMythicals)
 {
     if (!isValid)
     {
@@ -208,7 +208,7 @@ bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, boo
         convertFriendship(newPkmn) && convertMoves(newPkmn, method) &&
         convertEVs(newPkmn, method) && convertContestConditions(newPkmn) &&
         convertPokerus(newPkmn, method) && convertMetLocation(newPkmn, method) &&
-        convertMetLevel(newPkmn) && convertGameOfOrigin(newPkmn, method) &&
+        convertMetLevel(newPkmn, method) && convertGameOfOrigin(newPkmn, method) &&
         convertPokeball(newPkmn) && convertTrainerGender(newPkmn, method) &&
         convertIVs(newPkmn, method) && convertRibbonsAndObedience(newPkmn) &&
         convertShininess(newPkmn);
@@ -585,7 +585,7 @@ bool GBPokemon::convertMoves(Gen3Pokemon *newPkmn, ConversionMethod method)
     {
         case LEGAL:
         default:
-
+        {
             Species speciesIndexNum = (Species)getSpeciesIndexNumber();
             // Check that the moves are valid
             if ((speciesIndexNum != SMEARGLE) && (speciesIndexNum != MISSINGNO) &&
@@ -636,6 +636,7 @@ bool GBPokemon::convertMoves(Gen3Pokemon *newPkmn, ConversionMethod method)
                 if (swapped == false)
                     break;
             }
+        }
         break;
 
         case FAITHFUL:
@@ -715,20 +716,191 @@ bool GBPokemon::convertMetLocation(Gen3Pokemon *newPkmn, ConversionMethod method
         case FAITHFUL:
         case VIRTUAL:
         default:
-            newPkmn->setMetLocation(0xFF); // A fateful encounter
+            newPkmn->setMetLocation(FATEFUL_ENCOUNTER);
         return true;
-        
+
+        // Because we are Legal, all of these Pokemon will be from FRLG.
+        // They would get overwritten upon reaching HGSS anyway
         case LEGAL:
-            // TODO: do met location shenanigans
-            newPkmn->setMetLocation(0xFF);
+            UnownLetter letter;
+            switch(newPkmn->getSpeciesIndexNumber())
+            {
+                // Mew and Celebi are not part of this because they will be overwitten by the event.
+                case DITTO:
+                    newPkmn->setMetLocation(ROUTE_14);
+                break;
+                case ARTICUNO:
+                    newPkmn->setMetLocation(SEAFOAM_ISLANDS);
+                break;
+                case MOLTRES:
+                    newPkmn->setMetLocation(MT_EMBER);
+                break;
+                case ZAPDOS:
+                    newPkmn->setMetLocation(POWER_PLANT);
+                break;
+                case MEWTWO:
+                    newPkmn->setMetLocation(CERULEAN_CAVE);
+                break;
+                case RAIKOU:
+                    newPkmn->setMetLocation(ROUTE_10);
+                break;
+                case ENTEI:
+                    newPkmn->setMetLocation(ROUTE_23);
+                break;
+                case SUICUNE:
+                    newPkmn->setMetLocation(ROUTE_25);
+                break;
+                case LUGIA:
+                    newPkmn->setMetLocation(KANTO_NAVEL_ROCK);
+                break;
+                case HO_OH:
+                    newPkmn->setMetLocation(KANTO_NAVEL_ROCK);
+                break;
+                default:
+                    newPkmn->setMetLocation(FATEFUL_ENCOUNTER);
+                break;
+                case UNOWN:
+                    switch(newPkmn->getUnownLetter())
+                    {
+                        case UNOWN_A:
+                        case UNOWN_QUESTION:
+                            newPkmn->setMetLocation(MONEAN_CHAMBER);
+                        break;
+                        case UNOWN_C:
+                        case UNOWN_D:
+                        case UNOWN_H:
+                        case UNOWN_U:
+                        case UNOWN_O:
+                            newPkmn->setMetLocation(LIPTOO_CHAMBER);
+                        break;
+                        case UNOWN_N:
+                        case UNOWN_S:
+                        case UNOWN_I:
+                        case UNOWN_E:
+                            newPkmn->setMetLocation(WEEPTH_CHAMBER);
+                        break;
+                        case UNOWN_P:
+                        case UNOWN_J:
+                        case UNOWN_L:
+                        case UNOWN_R:
+                        case UNOWN_Q:
+                            newPkmn->setMetLocation(DILFORD_CHAMBER);
+                        break;
+                        case UNOWN_Y:
+                        case UNOWN_G:
+                        case UNOWN_T:
+                        case UNOWN_F:
+                        case UNOWN_K:
+                            newPkmn->setMetLocation(SCUFIB_CHAMBER);
+                        break;
+                        case UNOWN_V:
+                        case UNOWN_W:
+                        case UNOWN_X:
+                        case UNOWN_M:
+                        case UNOWN_B:
+                            newPkmn->setMetLocation(RIXY_CHAMBER);
+                        break;
+                        case UNOWN_Z:
+                        case UNOWN_EXCLAMATION:
+                            newPkmn->setMetLocation(VIAPOIS_CHAMBER);
+                        break;
+                        default:
+                            // Should never hit, but just in case.
+                            newPkmn->setMetLocation(TANOBY_CHAMBERS);
+                        break;
+                    }
+                break;
+            }
         return true;
     }
 }
 
-bool GBPokemon::convertMetLevel(Gen3Pokemon *newPkmn)
+bool GBPokemon::convertMetLevel(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
-    newPkmn->setLevelMet(getLevel());
-    return true;
+    switch(method)
+    {
+        case LEGAL:
+            int minLevel;
+            int minExp;
+            switch(newPkmn->getSpeciesIndexNumber())
+            {
+                // Mew and Celebi are not part of this because they will be overwitten by the event.
+                case DITTO:
+                    // Route 14
+                    minLevel = 23;
+                    minExp = 12167;
+                break;
+                case ARTICUNO: // Should never trigger, can't be caught normally below level 50
+                    // Seafoam Islands
+                    minLevel = 50;
+                    minExp = 156250;
+                break;
+                case MOLTRES: // Should never trigger, can't be caught normally below level 50
+                    // Mt. Ember
+                    minLevel = 50;
+                    minExp = 156250;
+                break;
+                case ZAPDOS: // Should never trigger, can't be caught normally below level 50
+                    // Power Plant
+                    minLevel = 50;
+                    minExp = 156250;
+                break;
+                case MEWTWO: // Should never trigger, can't be caught normally below level 70
+                    // Cerulean Cave
+                    minLevel = 70;
+                    minExp = 428750;
+                break;
+                case UNOWN:
+                    // Tanoby Chambers(ish)
+                    minLevel = 25;
+                    minExp = 15625;
+                break;
+                case RAIKOU:
+                    // Route 10 (Closest to the Power Plant)
+                    minLevel = 50;
+                    minExp = 156250;
+                break;
+                case ENTEI:
+                    // Route 23 (Closest to Victory Road)
+                    minLevel = 50;
+                    minExp = 156250;
+                break;
+                case SUICUNE:
+                    // Route 25 (Where it is caught in HGSS)
+                    minLevel = 50;
+                    minExp = 156250;
+                break;
+                case LUGIA:
+                    // Navel Rock
+                    minLevel = 70;
+                    minExp = 428750;
+                break;
+                case HO_OH:
+                    // Navel Rock
+                    minLevel = 70;
+                    minExp = 428750;
+                break;
+                default:
+                    minLevel = 0;
+                    minExp = 0;
+                break;
+
+                if(minExp > newPkmn->getExpPoints())
+                {
+                    newPkmn->setExpPoints(minExp);
+                    newPkmn->setLevelMet(minLevel);
+                    return convertEXP(newPkmn, method); // We need to update the EXP, since the level changed.
+                }
+            }
+        return true;
+
+
+        case FAITHFUL:
+        case VIRTUAL:
+        default:
+            newPkmn->setLevelMet(getLevel());
+        return true;
+    }
 }
 
 bool GBPokemon::convertGameOfOrigin(Gen3Pokemon *newPkmn, ConversionMethod method)

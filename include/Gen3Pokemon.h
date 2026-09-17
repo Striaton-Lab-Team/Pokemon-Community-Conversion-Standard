@@ -21,14 +21,11 @@ public:
     u16 getPrevRand_u16();
 
     // These are stored internally so that they can be set by different functions
-    byte internalUnownLetter;
+    UnownLetter internalUnownLetter;
     Nature internalNature;
     Gender internalGender;
     int internalSize;
     int internalAbility;
-
-    // This is used to set an internal value to "anything"
-    #define ANY_VALUE -1
 
 protected:
     // These store the data bytes
@@ -281,7 +278,7 @@ public:
 
     void updateSecurityData();
 
-    byte getUnownLetter() override;
+    UnownLetter getUnownLetter() override;
     Nature getNature();
     Gender getGender();
     int getAbilityFromPersonalityValue();

@@ -46,7 +46,8 @@ TABLES_STAMP := $(BUILDDIR)/.tables.$(BUILD_FLAVOR).stamp
 TABLE_GEN_INPUTS := $(shell find $(MKFILE_DIR)tools/table-generator -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.hpp" -o -name "Makefile" \))
 
 all:
-	@before=$$(stat -c %Y $(LIBDIR)/libpccs.a 2>/dev/null || echo 0); \
+	@set -e; \
+	before=$$(stat -c %Y $(LIBDIR)/libpccs.a 2>/dev/null || echo 0); \
 	$(MAKE) --no-print-directory all_internal; \
 	after=$$(stat -c %Y $(LIBDIR)/libpccs.a 2>/dev/null || echo 0); \
 	if [ "$$before" = "$$after" ] && [ "$$after" != "0" ]; then \

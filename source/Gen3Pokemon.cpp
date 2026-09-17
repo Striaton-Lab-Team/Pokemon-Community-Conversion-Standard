@@ -300,22 +300,22 @@ void Gen3Pokemon::updateSecurityData()
     encryptSubstructures();
 }
 
-byte Gen3Pokemon::getUnownLetter()
+UnownLetter Gen3Pokemon::getUnownLetter()
 {
     if (getSpeciesIndexNumber() == 201)
     {
 
         u32 personalityValue = getPersonalityValue();
-        return (
+        return (UnownLetter)((
                    ((personalityValue & 0x03000000) >> 18) +
                    ((personalityValue & 0x00030000) >> 12) +
                    ((personalityValue & 0x00000300) >> 6) +
                    ((personalityValue & 0x00000003) >> 0)) %
-               28;
+               28);
     }
     else
     {
-        return ANY_VALUE;
+        return NO_LETTER;
     }
 };
 

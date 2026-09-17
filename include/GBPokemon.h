@@ -106,7 +106,7 @@ public:
 
     // These aren't direct variables, but they're useful to have
     Language getLanguage() { return lang; };
-    byte getUnownLetter() override;
+    UnownLetter getUnownLetter() override;
     Gender getGender();
     Nature getVirtualConsoleNature();
     Nature getPsudoRandomNature();
@@ -134,7 +134,7 @@ public:
     bool convertContestConditions(Gen3Pokemon *newPkmn);
     bool convertPokerus(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertMetLocation(Gen3Pokemon *newPkmn, ConversionMethod method);
-    bool convertMetLevel(Gen3Pokemon *newPkmn);
+    bool convertMetLevel(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertGameOfOrigin(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertPokeball(Gen3Pokemon *newPkmn);
     bool convertTrainerGender(Gen3Pokemon *newPkmn, ConversionMethod method);

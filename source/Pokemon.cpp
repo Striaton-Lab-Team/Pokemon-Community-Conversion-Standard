@@ -10,14 +10,34 @@ u32 Pokemon::getSpeciesIndexNumber()
     return 0;
 }
 
-byte Pokemon::getUnownLetter()
+UnownLetter Pokemon::getUnownLetter()
 {
-    return 0;
+    return NO_LETTER;
 }
 
 bool Pokemon::getIsShiny()
 {
     return false;
+}
+
+bool Pokemon::getIsHatchable()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon != DITTO && 
+        mon != ARTICUNO &&
+        mon != MOLTRES &&
+        mon != ZAPDOS &&
+        mon != MEWTWO &&
+        mon != MEW &&
+        mon != UNOWN &&
+        mon != RAIKOU &&
+        mon != ENTEI &&
+        mon != SUICUNE &&
+        mon != LUGIA &&
+        mon != HO_OH &&
+        mon != CELEBI
+    );
 }
 
 u32 Pokemon::getVar(const DataVarInfo& dataVar)
