@@ -675,7 +675,7 @@ bool GBPokemon::convertEVs(Gen3Pokemon *newPkmn, ConversionMethod method)
         {
             int evs[6];
             int total = 0;
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 5; i++)
             {
                 int sqrt = 1;
                 int statExp = getStatExp(Stat(i));
@@ -686,13 +686,15 @@ bool GBPokemon::convertEVs(Gen3Pokemon *newPkmn, ConversionMethod method)
                 evs[i] = (sqrt / 4) * 4; // This truncates it out to a multiple of 4
                 total += evs[i];
             }
+            evs[SPECIAL_DEFENSE] = evs[SPECIAL_ATTACK];
 
             
             while(
                 // Make sure we aren't over the max number of EVs
                 total > 510 || 
                 // Make sure there's no more than 255 in a given stat
-                evs[0] > 255 || evs[0] > 255 || evs[0] > 255 || evs[0] > 255 || evs[0] > 255 || evs[0] > 255)
+                evs[HP] > 255 || evs[ATTACK] > 255 || evs[DEFENSE] > 255 || 
+                evs[SPEED] > 255 || evs[SPECIAL_ATTACK] > 255 || evs[SPECIAL_DEFENSE] > 255)
             {
                 // Pick the stat with the most EVs and lower it.
                 int largestStat;
@@ -1038,7 +1040,7 @@ bool GBPokemon::setRequestedNature(Gen3Pokemon *newPkmn, ConversionMethod method
         case FAITHFUL:
             newPkmn->internalNature = NEUTRAL_NATURE;
         return true;
-        
+
         case LEGAL:
         default:
             newPkmn->internalNature = ANY_NATURE;

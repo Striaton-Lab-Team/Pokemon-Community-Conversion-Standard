@@ -159,12 +159,37 @@ std::string Gen3Pokemon::printDataArray(bool encryptedData)
     {
         encryptSubstructures();
     }
+    else
+    {
+        decryptSubstructures();
+    }
     std::stringstream ss;
     for (int i = 0; i < 80; i++)
     {
         ss << std::hex << std::setw(2) << std::setfill('0') << (int)dataArray[i] << (i < 79 ? " " : "");
     }
     return ss.str();
+}
+std::array<byte, 80> Gen3Pokemon::outputByteArray(bool encryptedData, bool standardizeSubstruct)
+{
+    updateSubstructureOrder(true);
+    updateChecksum();
+    if(encryptedData)
+    {
+        encryptSubstructures();
+    }
+    else
+    {
+        decryptSubstructures();
+    }
+    
+    if(standardizeSubstruct)
+    {
+        resetSubstructureOrder();
+    }
+    std::array<byte, 80> output{};
+    std::memcpy(output.data(), dataArray, output.size());
+    return output;
 }
 #endif
 
@@ -290,6 +315,32 @@ void Gen3Pokemon::updateSubstructureOrder(bool shouldMove)
         }
     }
 
+    memcpy(substructOffsets, newSubstructOffsets, sizeof(newSubstructOffsets));
+}
+
+void Gen3Pokemon::resetSubstructureOrder()
+{
+    u8 newSubstructOffsets[4] = {0, 1, 2, 3};
+
+    u8 tempBuffer[48];
+    uintptr_t oldOffset;
+    uintptr_t newOffset;
+    u8 *dataSectionStartPtr = dataArrayPtr + GEN3_PKMN_DATA_SUBSTRUCT_OFFSET;
+    u32 i;
+
+    // first we copy the old data sections into a temporary buffer, since they might get overwritten during the move process.
+    memcpy(tempBuffer, dataSectionStartPtr, 48);
+
+    // now we copy the data from the temporary buffer to the correct new locations in the data array, based on the new substructure offsets.
+    // for each of the substructures (G, A, E, M), we find where it is currently located in the data array using substructOffsets, and then 
+    // we copy it to its new location based on newSubstructOffsets.
+    for(i=0; i < 4; ++i)
+    {
+        oldOffset = substructOffsets[i] * GEN3_POKEMON_SUBSTRUCTURE_SIZE;
+        newOffset = newSubstructOffsets[i] * GEN3_POKEMON_SUBSTRUCTURE_SIZE;
+        memcpy(dataSectionStartPtr + newOffset, tempBuffer + oldOffset, GEN3_POKEMON_SUBSTRUCTURE_SIZE);
+    }
+    
     memcpy(substructOffsets, newSubstructOffsets, sizeof(newSubstructOffsets));
 }
 

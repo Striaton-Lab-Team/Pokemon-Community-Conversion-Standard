@@ -3,6 +3,11 @@
 
 #include "Pokemon.h"
 
+#if ON_GBA
+#else
+#include <array>
+#endif
+
 static const u32 GEN3_PKMN_DATA_SUBSTRUCT_OFFSET = 0x20;
 
 class Gen3Pokemon : public Pokemon // The class for gen 3 Pokemon
@@ -184,6 +189,7 @@ protected:
 public:
     void print(std::ostream &os);
     std::string printDataArray(bool encrypedData);
+    std::array<byte, 80> outputByteArray(bool encrypedData, bool standardizeSubstruct);
 #endif
 
 public:
@@ -275,6 +281,8 @@ public:
     void updateChecksum();
 
     void updateSubstructureOrder(bool shouldMove);
+
+    void resetSubstructureOrder();
 
     void updateSecurityData();
 

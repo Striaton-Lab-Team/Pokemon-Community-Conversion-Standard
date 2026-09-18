@@ -120,7 +120,7 @@ void PokeBox::convertPkmn(int index)
     Pokemon *basePkmn = getPokemon(index);
     GBPokemon *oldPkmn = (GBPokemon *)(basePkmn);
 
-    oldPkmn->convertToGen3(convertedPkmn, ORIGINAL, stabilize_mythical);
+    oldPkmn->convertToGen3(convertedPkmn, LEGAL, stabilize_mythical);
 
     // Set the initial checksum so that isEncrypted() correctly returns false
     // for this freshly converted, unencrypted Pokemon.

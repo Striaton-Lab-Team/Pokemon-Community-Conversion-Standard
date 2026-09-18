@@ -38,7 +38,7 @@ TEST_CASE("Basic gen 1 test - check that pokemon data is parsed correctly", "[un
 {
     PokemonTables table;
 
-    Gen1Pokemon charmander(&table);
+    Gen1Pokemon charmander(ENGLISH, &table);
     charmander.loadData(ENGLISH, charmander_data, charmander_name, charmander_ot, charmander_id);
 
     REQUIRE(charmander.getRawSpeciesIndexNumber() == 0xB0);
@@ -51,7 +51,7 @@ TEST_CASE("Basic gen 2 test - check that pokemon data is parsed correctly", "[un
 {
     PokemonTables table;
 
-    Gen2Pokemon cyndaquil(&table);
+    Gen2Pokemon cyndaquil(ENGLISH, &table);
     cyndaquil.loadData(ENGLISH, cyndaquil_data, cyndaquil_name, cyndaquil_ot, cyndaquil_id);
 
     REQUIRE(cyndaquil.getSpeciesIndexNumber() == 0x9B);
@@ -66,11 +66,11 @@ TEST_CASE("Basic gen2-gen3 conversion test", "[unit][gen2][gen3][conversion]")
 {
     PokemonTables table;
 
-    Gen2Pokemon cyndaquil(&table);
+    Gen2Pokemon cyndaquil(ENGLISH, &table);
     cyndaquil.loadData(ENGLISH, cyndaquil_data, cyndaquil_name, cyndaquil_ot, cyndaquil_id);
 
     Gen3Pokemon convertedCyndaquil(&table);
-    REQUIRE(cyndaquil.convertToGen3(&convertedCyndaquil, true) == true);
+    REQUIRE(cyndaquil.convertToGen3(&convertedCyndaquil, FAITHFUL, true) == true);
 
     REQUIRE(convertedCyndaquil.getTrainerID() == 7465);
     REQUIRE(convertedCyndaquil.getSecretID() == 0);
