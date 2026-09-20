@@ -14,9 +14,9 @@
 
 std::string inputBox = "inBox";
 std::string outputBox = "outBox";
-int generation = 1;
+int generation = 2;
 Language language = ENGLISH;
-ConversionMethod method = ORIGINAL;
+ConversionMethod method = LEGAL;
 
 bool printPokemon = false;
 bool sanitizeMythicals = false;
@@ -82,7 +82,7 @@ int convert(std::string inputPath, std::string outputPath)
     Gen3Pokemon converted(&table);
     if (!source->convertToGen3(&converted, method, sanitizeMythicals))
     {
-        std::cerr << "PCCS could not convert the Pokemon\n";
+        std::cerr << "PCCS could not convert the Pokemon (" << inputPath << ")\n";
         return 1;
     }
 

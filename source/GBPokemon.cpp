@@ -569,6 +569,10 @@ bool GBPokemon::convertEXP(Gen3Pokemon *newPkmn, ConversionMethod method)
             break;
         }
     }
+    else
+    {
+        newPkmn->setExpPoints(getExpPoints());
+    }
     return true;
 };
 
@@ -795,7 +799,7 @@ bool GBPokemon::convertMetLocation(Gen3Pokemon *newPkmn, ConversionMethod method
                     newPkmn->setMetLocation(KANTO_NAVEL_ROCK);
                 break;
                 default:
-                    newPkmn->setMetLocation(FATEFUL_ENCOUNTER);
+                    newPkmn->setMetLocation(PALLET_TOWN);
                 break;
                 case UNOWN:
                     switch(newPkmn->getUnownLetter())
