@@ -9,9 +9,7 @@
 GBPokemon::GBPokemon()
 {
     nicknameArrayPtr = nicknameArray;
-    nicknameArraySize = 11;
     OTArrayPtr = OTArray;
-    OTArraySize = 11;
     externalIndexNumberPtr = &externalIndexNumber;
     isBigEndian = true;
     generation = 0;
@@ -331,16 +329,8 @@ void GBPokemon::updateValidity()
 
 bool GBPokemon::externalConvertNickname(PokemonTables *pokeTable, byte outputArray[])
 {
-    switch (getLanguage())
-    {
-    case SPANISH:
-        pokeTable->load_input_charset(generation, ENGLISH);
-        break;
-    default:
-        pokeTable->load_input_charset(generation, getLanguage());
-        break;
-    }
 
+    pokeTable->load_input_charset(generation, getLanguage());
     pokeTable->load_gen3_charset(getLanguage());
     for (int i = 0; i < 10; i++)
     {
@@ -401,21 +391,22 @@ bool GBPokemon::convertTrainerID(Gen3Pokemon *newPkmn)
 
 bool GBPokemon::convertNickname(PokemonTables *pokeTable, Gen3Pokemon *newPkmn)
 {
-    switch (getLanguage())
-    {
-    case SPANISH:
-        pokeTable->load_input_charset(generation, ENGLISH);
-        break;
-    default:
-        pokeTable->load_input_charset(generation, getLanguage());
-        break;
-    }
+    pokeTable->load_input_charset(generation, getLanguage());
     pokeTable->load_gen3_charset(getLanguage());
+    bool hitTerminator = false;
+    byte currLetter;
     for (int i = 0; i < 10; i++)
     {
-        newPkmn->setNicknameLetter(
-            i, pokeTable->get_gen_3_char(
-                   pokeTable->input_charset[nicknameArray[i]]));
+        if (hitTerminator)
+        {
+            newPkmn->setNicknameLetter(i, 0xFF);
+        }
+        else
+        {
+            currLetter = pokeTable->get_gen_3_char(pokeTable->input_charset[nicknameArray[i]]);
+            newPkmn->setNicknameLetter(i, currLetter);
+            hitTerminator = currLetter == 0xFF;
+        }
     }
     return true;
 };
@@ -437,23 +428,25 @@ bool GBPokemon::convertMiscFlags(Gen3Pokemon *newPkmn)
 
 bool GBPokemon::convertTrainerNickname(PokemonTables *pokeTable, Gen3Pokemon *newPkmn)
 {
-    switch (getLanguage())
-    {
-    case SPANISH:
-        pokeTable->load_input_charset(generation, ENGLISH);
-        break;
-    default:
-        pokeTable->load_input_charset(generation, getLanguage());
-        break;
-    }
-    pokeTable->load_gen3_charset(getLanguage());
 
+    pokeTable->load_input_charset(generation, getLanguage());
+    pokeTable->load_gen3_charset(getLanguage());
+    bool hitTerminator = false;
+    byte currLetter;
+    
     for (int i = 0; i < 7; i++)
     {
-        newPkmn->setOTLetter(
-            i, pokeTable->get_gen_3_char(pokeTable->input_charset[OTArray[i]]));
+        if (hitTerminator)
+        {
+            newPkmn->setOTLetter(i, 0xFF);
+        }
+        else
+        {
+            currLetter = pokeTable->get_gen_3_char(pokeTable->input_charset[OTArray[i]]);
+            newPkmn->setOTLetter(i, currLetter);
+            hitTerminator = currLetter == 0xFF;
+        }
     }
-
     return true;
 };
 

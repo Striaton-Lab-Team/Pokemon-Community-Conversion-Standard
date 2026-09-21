@@ -1,10 +1,21 @@
 #include "Gen1Pokemon.h"
 
-Gen1Pokemon::Gen1Pokemon()
+Gen1Pokemon::Gen1Pokemon(Language nLang)
 {
     dataArrayPtr = dataArray;
     dataArraySize = 33;
     generation = 1;
+        
+    if (nLang == JAPANESE)
+    {
+        nicknameArraySize = 6;
+        OTArraySize = 6;
+    }
+    else
+    {
+        nicknameArraySize = 11;
+        OTArraySize = 11;
+    }
 }
 
 #if ON_GBA

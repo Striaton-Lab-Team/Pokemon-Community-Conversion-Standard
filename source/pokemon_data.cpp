@@ -1791,7 +1791,7 @@ PokemonTables::PokemonTables()
     : exp_groups_loaded(false), gender_ratios_loaded(false),
       num_abilities_loaded(false), first_moves_loaded(false),
       power_points_loaded(false), event_pkmn_loaded(false), types_loaded(false),
-      input_charset_type(0), gen3_charset_type(0)
+      input_charset_type(0), gen3_charset_type(LANGUAGE_UNKNOWN)
 {
 }
 

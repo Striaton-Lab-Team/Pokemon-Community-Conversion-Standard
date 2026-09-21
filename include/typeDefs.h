@@ -657,7 +657,7 @@ enum Substructure
 enum Language
 {
     LANGUAGE_UNKNOWN = -1,
-    JAPANESE,
+    JAPANESE = 1,
     ENGLISH,
     FRENCH,
     ITALIAN,

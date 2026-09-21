@@ -17,16 +17,16 @@ const struct GB_ROM gb_rom_values_kor[] = {
         .language = KOR_ID,
         .version = GOLD_ID,
         .generation = 2,
-        .box_data_size = 0x0,
-        .wCurrentBoxNum = 0x0,
-        .wBoxDataStart = 0x0},
+        .box_data_size = 0x44E,
+        .wCurrentBoxNum = 0x01D94F, // wCurBox
+        .wBoxDataStart = 0x01ADAE}, // sBox
     {// KOR_SILVER
         .language = KOR_ID,
         .version = SILVER_ID,
         .generation = 2,
-        .box_data_size = 0x0,
-        .wCurrentBoxNum = 0x0,
-        .wBoxDataStart = 0x0},
+        .box_data_size = 0x44E,
+        .wCurrentBoxNum = 0x01D94F, // wCurBox
+        .wBoxDataStart = 0x01ADAE}, // sBox
     {
         // KOR_CRYSTAL},
     }
