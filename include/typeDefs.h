@@ -944,12 +944,6 @@ enum Version
     CRYSTAL,
 };
 
-enum RNGMethod
-{
-    ABCD_U, // Normal method
-    BACD_R, // Used for calculating events
-};
-
 enum class Endianness
 {
     READ_AS_IS,

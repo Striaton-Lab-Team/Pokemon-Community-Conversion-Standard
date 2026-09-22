@@ -109,7 +109,6 @@ public:
     UnownLetter getUnownLetter() override;
     Gender getGender();
     Nature getVirtualConsoleNature();
-    Nature getPsudoRandomNature();
     bool getIsShiny() override;
     bool externalConvertNickname(byte outputArray[]);
 
@@ -117,7 +116,7 @@ public:
     bool convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, bool sanitizeMythicals=true);
     bool loadEvent(Gen3Pokemon *newPkmn, ConversionMethod method);
 
-    bool generatePersonalityValue(Gen3Pokemon *newPkmn, RNGMethod rng);
+    bool generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionMethod method, bool isEvent);
     bool convertTrainerID(Gen3Pokemon *newPkmn);
     bool convertNickname(Gen3Pokemon *newPkmn);
     bool convertLanguage(Gen3Pokemon *newPkmn);
@@ -138,7 +137,6 @@ public:
     bool convertGameOfOrigin(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertPokeball(Gen3Pokemon *newPkmn);
     bool convertTrainerGender(Gen3Pokemon *newPkmn, ConversionMethod method);
-    bool convertIVs(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertAbilityFlag(Gen3Pokemon *newPkmn);
     bool convertRibbonsAndObedience(Gen3Pokemon *newPkmn);
     bool convertShininess(Gen3Pokemon *newPkmn);
@@ -148,9 +146,6 @@ public:
     bool setRequestedGender(Gen3Pokemon *newPkmn);
     bool setRequestedAbility(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool setRequestedSize(Gen3Pokemon *newPkmn, ConversionMethod method);
-    // RNG
-    byte getNextPseudoRandomNumber();
-    byte getNextTrulyRandomNumber();
 };
 
 #endif

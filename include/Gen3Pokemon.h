@@ -25,6 +25,8 @@ public:
     u16 getNextRand_u16();
     u16 getPrevRand_u16();
 
+    int reverseRand(u16 first, u16 second, u32 *values);
+
     // These are stored internally so that they can be set by different functions
     UnownLetter internalUnownLetter;
     Nature internalNature;

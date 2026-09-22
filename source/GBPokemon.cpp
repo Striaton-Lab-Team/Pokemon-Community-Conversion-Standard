@@ -1,4 +1,5 @@
 #include "GBPokemon.h"
+#include "pccs_utils.h"
 #include <cstring>
 
 #if ACCESS_POKEDEX
@@ -173,11 +174,6 @@ Nature GBPokemon::getVirtualConsoleNature()
     return (Nature)(getExpPoints() % 25);
 }
 
-Nature GBPokemon::getPsudoRandomNature()
-{
-    return (Nature)(getNextPseudoRandomNumber() % 25);
-}
-
 bool GBPokemon::getIsShiny()
 {
     return ((getDV(ATTACK) & 0b0010) == 0b0010) && getDV(DEFENSE) == 10 &&
@@ -197,8 +193,8 @@ bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, boo
         setRequestedNature(newPkmn, method) && setRequestedGender(newPkmn) &&
         setRequestedAbility(newPkmn, method) && setRequestedSize(newPkmn, method) &&
 
-        // Then set the PID
-        generatePersonalityValue(newPkmn, ABCD_U) &&
+        // Then set the PID and IVs
+        generatePersonalityValueAndIVs(newPkmn, method, false) &&
 
         // Then set everything else
         convertTrainerID(newPkmn) && convertNickname(newPkmn) &&
@@ -210,8 +206,7 @@ bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, boo
         convertPokerus(newPkmn, method) && convertMetLocation(newPkmn, method) &&
         convertMetLevel(newPkmn, method) && convertGameOfOrigin(newPkmn, method) &&
         convertPokeball(newPkmn) && convertTrainerGender(newPkmn, method) &&
-        convertIVs(newPkmn, method) && convertRibbonsAndObedience(newPkmn) &&
-        convertShininess(newPkmn);
+        convertRibbonsAndObedience(newPkmn) && convertShininess(newPkmn);
 
     if ((getSpeciesIndexNumber() == MEW || getSpeciesIndexNumber() == CELEBI))
     {
@@ -243,8 +238,8 @@ bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, boo
 
 bool GBPokemon::loadEvent(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
-    bool valid = generatePersonalityValue(newPkmn, BACD_R) &&
-                 convertEVs(newPkmn, method) && convertIVs(newPkmn, method);
+    bool valid = generatePersonalityValueAndIVs(newPkmn, method, true) &&
+                 convertEVs(newPkmn, method);
     if (!valid)
     {
         return false;
@@ -363,46 +358,146 @@ bool GBPokemon::externalConvertNickname(byte outputArray[])
     return true;
 };
 
-bool GBPokemon::generatePersonalityValue(Gen3Pokemon *newPkmn, RNGMethod rng)
+bool GBPokemon::generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionMethod method, bool isEvent)
 {
-    newPkmn->currRand = getPureRand();
-    u32 pid = 0;
-    u16 seedA = 0;
-    u16 seedB = 0;
-    do
+    switch(method)
     {
-        if (rng == ABCD_U)
+        case FAITHFUL:
+        case LEGAL:
+        // The goal here is to maintain the DVs as IVs, just doubled and maybe +1, unless they are events
         {
-            seedA = newPkmn->getNextRand_u16();
-            seedB = newPkmn->getNextRand_u16();
-            pid = seedA | (seedB << 16);
+
         }
-        else if (rng == BACD_R)
+        return true;
+
+        case VIRTUAL:
+        // The goal here is to set 3 (or 5) of the IVs to be perfect.
+        // First, we roll which IVs should be perfect. From there we fill each non-perfect IV with a random value, and reverse the RNG.
+        // If we get a match, great. If we don't, re roll the non-perfect IVs, up to 4 times per non-perfect IV we have.
+        // If none of those match, roll which IVs should be perfect again.
         {
-            newPkmn->currRand &= 0xFFFF; // Restrict the seed to 16 bits
-            seedA = newPkmn->getNextRand_u16();
-            seedB = newPkmn->getNextRand_u16();
-            pid = seedB | (seedA << 16);
+        #define MAX_ROLLS_PER_IV 4
+            int numPerfect = 3;
+            u32 seeds[3];
+
+            while(true)
+            {
+                bool perfIVs[6] = {};
+                for (int i = 0; i < numPerfect; i++)
+                {
+                    u32 rand;
+                    do
+                    {
+                        rand = getPureRand();
+                    }
+                    while(perfIVs[rand % 6]);
+                    perfIVs[rand % 6] = true;
+                }
+                for (int rolls = 0; rolls < MAX_ROLLS_PER_IV * (6 - numPerfect); rolls++)
+                {
+                    u16 IVSeeds[2] = {0};
+                    int val;
+                    for (int i = 0; i < 6; i++)
+                    {
+                        if (perfIVs[i])
+                        {
+                            val = 31;
+                        }
+                        else
+                        {
+                            val = getPureRand() % 32;
+                        }
+                        IVSeeds[i / 3] |= (val & 0x1F) << (5 * (i % 3));
+                    }
+                    int num;
+                    if (getIsHatchable())
+                    {
+                        num = INT32_MAX;
+                    }
+                    else
+                    {
+                        num = PCCSUtils::reverseIVForPID(IVSeeds[0], IVSeeds[1], seeds);
+                    }
+
+                    for (int i = 0; i < num; i++)
+                    {
+                        u32 pidLowSeed;
+                        if (getIsHatchable())
+                        {
+                            pidLowSeed = getPureRand();
+                        }
+                        else
+                        {
+                            pidLowSeed = seeds[i];
+                        }
+                        
+                        u16 pidLow = pidLowSeed >> 16;
+                        newPkmn->currRand = pidLowSeed;
+                        u16 pidHigh = newPkmn->getNextRand_u16();
+                        u32 pid = pidLow | (pidHigh << 16);
+
+                        newPkmn->setPersonalityValue(pid);
+                        if(
+                            newPkmn->getAbilityFromPersonalityValue() == newPkmn->internalAbility &&
+                            newPkmn->getUnownLetter() == newPkmn->internalUnownLetter &&
+                            newPkmn->getNature() == newPkmn->internalNature &&
+                            newPkmn->getGender() == newPkmn->internalGender &&
+                            newPkmn->getSize() == newPkmn->internalSize
+                        )
+                        {
+                            u16 IVSeed;
+                            IVSeed = newPkmn->getNextRand_u16();
+                            newPkmn->setIV(HP, (IVSeed >> 0) & 0b11111);
+                            newPkmn->setIV(ATTACK, (IVSeed >> 5) & 0b11111);
+                            newPkmn->setIV(DEFENSE, (IVSeed >> 10) & 0b11111);
+                            IVSeed = newPkmn->getNextRand_u16();
+                            newPkmn->setIV(SPEED, (IVSeed >> 0) & 0b11111);
+                            newPkmn->setIV(SPECIAL_ATTACK, (IVSeed >> 5) & 0b11111);
+                            newPkmn->setIV(SPECIAL_DEFENSE, (IVSeed >> 10) & 0b11111);
+                            return true;
+                        }
+                    }
+                }
+            }
         }
-        newPkmn->setPersonalityValue(pid);
-        // std::cout << "Testing PID: " << std::hex << pid << "\n";
-        /*
-        std::cout << "PV: " << newPkmn->getPersonalityValue() << "\n"
-                  << "Letter: " << newPkmn->getUnownLetter() << " | " <<
-        getUnownLetter() << "\n"
-                  << "Nature: " << newPkmn->getNature() << " | " <<
-        getVirtualConsoleNature() << "\n"
-                  << "Gender: " << newPkmn->getGender() << " | " << getGender()
-        <<
-        "\n";
-                  */
-    } while (!(
-        newPkmn->getAbilityFromPersonalityValue() == newPkmn->internalAbility &&
-        newPkmn->getUnownLetter() == newPkmn->internalUnownLetter &&
-        newPkmn->getNature() == newPkmn->internalNature &&
-        newPkmn->getGender() == newPkmn->internalGender &&
-        newPkmn->getSize() == newPkmn->internalSize));
-    return true;
+        
+        default:
+        // The original method set the IVs after the PID
+        {
+            newPkmn->currRand = getPureRand();
+            u32 pid = 0;
+            u16 seedA = 0;
+            u16 seedB = 0;
+            do
+            {
+                if (isEvent)
+                {            
+                    newPkmn->currRand &= 0xFFFF; // Restrict the seed to 16 bits
+                }
+                seedA = newPkmn->getNextRand_u16();
+                seedB = newPkmn->getNextRand_u16();
+                pid = seedB | (seedA << 16);
+                newPkmn->setPersonalityValue(pid);
+            } while (!(
+                newPkmn->getAbilityFromPersonalityValue() == newPkmn->internalAbility &&
+                newPkmn->getUnownLetter() == newPkmn->internalUnownLetter &&
+                newPkmn->getNature() == newPkmn->internalNature &&
+                newPkmn->getGender() == newPkmn->internalGender &&
+                newPkmn->getSize() == newPkmn->internalSize)
+            );
+
+            u16 IVSeed;
+            IVSeed = newPkmn->getNextRand_u16();
+            newPkmn->setIV(HP, (IVSeed >> 0) & 0b11111);
+            newPkmn->setIV(ATTACK, (IVSeed >> 5) & 0b11111);
+            newPkmn->setIV(DEFENSE, (IVSeed >> 10) & 0b11111);
+            IVSeed = newPkmn->getNextRand_u16();
+            newPkmn->setIV(SPEED, (IVSeed >> 0) & 0b11111);
+            newPkmn->setIV(SPECIAL_ATTACK, (IVSeed >> 5) & 0b11111);
+            newPkmn->setIV(SPECIAL_DEFENSE, (IVSeed >> 10) & 0b11111);
+        }
+        return true;
+    }
 };
 
 bool GBPokemon::convertTrainerID(Gen3Pokemon *newPkmn)
@@ -645,7 +740,11 @@ bool GBPokemon::convertMoves(Gen3Pokemon *newPkmn, ConversionMethod method)
 
         case FAITHFUL:
         case VIRTUAL:
-            // Keep all the moves
+            for (int i = 0; i < 4; i++)
+            {
+                newPkmn->setMove(i, getMove(i));       // Add the move
+                newPkmn->setPPUpNum(i, getPPUpNum(i)); // Add the PP Bonuses
+            }
         break;
     }
 
@@ -862,6 +961,7 @@ bool GBPokemon::convertMetLevel(Gen3Pokemon *newPkmn, ConversionMethod method)
     switch(method)
     {
         case LEGAL:
+        {
             int minLevel;
             int minExp;
             switch(newPkmn->getSpeciesIndexNumber())
@@ -923,22 +1023,49 @@ bool GBPokemon::convertMetLevel(Gen3Pokemon *newPkmn, ConversionMethod method)
                     minExp = 428750;
                 break;
                 default:
-                    minLevel = 0;
-                    minExp = 0;
-                break;
-
-                if(minExp > newPkmn->getExpPoints())
-                {
-                    newPkmn->setExpPoints(minExp);
-                    newPkmn->setLevelMet(minLevel);
-                    return convertEXP(newPkmn, method); // We need to update the EXP, since the level changed.
+                    pokeTable->load_exp_groups();
+                    switch(pokeTable->EXP_GROUPS[newPkmn->getSpeciesIndexNumber()])
+                    {
+                        case EXP_MED_FAST:
+                            minLevel = 5;
+                            minExp = 125; 
+                        break;
+                        case EXP_MED_SLOW:
+                            minLevel = 5;
+                            minExp = 135;  
+                        break;
+                        case EXP_FAST:
+                            minLevel = 5;
+                            minExp = 100;  
+                        break;
+                        case EXP_SLOW:
+                            minLevel = 5;
+                            minExp = 156;  
+                        break;
+                        default:
+                            minLevel = 0;
+                            minExp = 0;   
+                        break;                  
                 }
+                break;
             }
+
+            if(minExp > newPkmn->getExpPoints())
+            {
+                newPkmn->setExpPoints(minExp);
+                newPkmn->setLevelMet(minLevel);
+                return convertEXP(newPkmn, method); // We need to update the EXP, since the level changed.
+            }
+        }
         return true;
 
-
-        case FAITHFUL:
         case VIRTUAL:
+        if (getIsHatchable())
+        {
+            newPkmn->setLevelMet(0);
+            return true;
+        }
+        case FAITHFUL:
         default:
             newPkmn->setLevelMet(getLevel());
         return true;
@@ -998,23 +1125,6 @@ bool GBPokemon::convertTrainerGender(Gen3Pokemon *newPkmn, ConversionMethod meth
     }
 };
 
-bool GBPokemon::convertIVs(Gen3Pokemon *newPkmn, ConversionMethod method)
-{
-    // TODO: All this jazz
-    u16 currRand;
-
-    currRand = newPkmn->getNextRand_u16();
-    newPkmn->setIV(HP, (currRand >> 0) & 0b11111);
-    newPkmn->setIV(ATTACK, (currRand >> 5) & 0b11111);
-    newPkmn->setIV(DEFENSE, (currRand >> 10) & 0b11111);
-    currRand = newPkmn->getNextRand_u16();
-    newPkmn->setIV(SPEED, (currRand >> 0) & 0b11111);
-    newPkmn->setIV(SPECIAL_ATTACK, (currRand >> 5) & 0b11111);
-    newPkmn->setIV(SPECIAL_DEFENSE, (currRand >> 10) & 0b11111);
-
-    return true;
-};
-
 bool GBPokemon::convertAbilityFlag(Gen3Pokemon *newPkmn)
 {
     newPkmn->setAbility(newPkmn->getPersonalityValue() & 0b1);
@@ -1067,7 +1177,14 @@ bool GBPokemon::setRequestedAbility(Gen3Pokemon *newPkmn, ConversionMethod metho
     switch(method)
     {
         case VIRTUAL:
-            newPkmn->internalAbility = 0;
+            if (pokeTable->get_num_abilities(newPkmn->getSpeciesIndexNumber()) == 1)
+            {
+                newPkmn->internalAbility = 0;
+            } 
+            else
+            {
+                newPkmn->internalAbility = ANY_VALUE;
+            }
         return true;
 
         case FAITHFUL:
@@ -1096,18 +1213,6 @@ bool GBPokemon::setRequestedSize(Gen3Pokemon *newPkmn, ConversionMethod method)
     }
 
 };
-
-byte GBPokemon::getNextPseudoRandomNumber()
-{
-    // TODO: ACTUALLY MAKE THIS RANDOM
-    return 0;
-}
-
-byte GBPokemon::getNextTrulyRandomNumber()
-{
-    // TODO: ACTUALLY MAKE THIS RANDOM
-    return 0;
-}
 
 bool GBPokemon::convertShininess(Gen3Pokemon *newPkmn)
 {
