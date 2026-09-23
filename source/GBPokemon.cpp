@@ -206,7 +206,7 @@ bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, boo
         convertPokerus(newPkmn, method) && convertMetLocation(newPkmn, method) &&
         convertMetLevel(newPkmn, method) && convertGameOfOrigin(newPkmn, method) &&
         convertPokeball(newPkmn) && convertTrainerGender(newPkmn, method) &&
-        convertRibbonsAndObedience(newPkmn) && convertShininess(newPkmn);
+        convertAbilityFlag(newPkmn) && convertRibbonsAndObedience(newPkmn) && convertShininess(newPkmn);
 
     if ((getSpeciesIndexNumber() == MEW || getSpeciesIndexNumber() == CELEBI))
     {
@@ -358,6 +358,22 @@ bool GBPokemon::externalConvertNickname(byte outputArray[])
     return true;
 };
 
+
+u32 GBPokemon::getIndividualDataChecksum()
+{
+    u32 out = 
+    getDV(HP)       << 0  |
+    getDV(ATTACK)   << 4  |
+    getDV(DEFENSE)  << 8  |
+    getDV(SPECIAL)  << 12 |
+    getTrainerID()  << 16;
+
+    for(int i = 0; i < 4; i++)
+    {
+        out |= getSpeciesIndexNumber();
+    }
+}
+
 bool GBPokemon::generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionMethod method, bool isEvent)
 {
     switch(method)
@@ -366,9 +382,83 @@ bool GBPokemon::generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionM
         case LEGAL:
         // The goal here is to maintain the DVs as IVs, just doubled and maybe +1, unless they are events
         {
+            u32 seeds[3];
 
+            int currRand = newPkmn->getNextRand_u16() & 0b111111;
+            for(int count = 0; count < (2 << 6); count++)
+            {
+                u16 IVSeeds[2] = {0};
+                int val;
+                for (int i = 0; i < 6; i++)
+                {
+                    val = getDV((Stat)(i < 5 ? i : 4)) * 2;
+                    val |= ((currRand >> i) & 0b1);
+                    IVSeeds[i / 3] |= (val & 0x1F) << (5 * (i % 3));
+                }
+                int num;
+                if (getIsHatchable())
+                {
+                    num = INT32_MAX;
+                }
+                else
+                {
+                    num = PCCSUtils::reverseIVForPID(IVSeeds[0], IVSeeds[1], seeds);
+                }
+
+                for (int i = 0; i < num; i++)
+                {
+                    u32 pidHighSeed;
+                    if (getIsHatchable())
+                    {
+                        pidHighSeed = getPureRand();
+                    }
+                    else
+                    {
+                        pidHighSeed = seeds[i];
+                    }
+                    
+                    u16 pidHigh = pidHighSeed >> 16;
+                    newPkmn->currRand = pidHighSeed;
+                    u16 pidLow = newPkmn->getNextRand_u16();
+                    u32 pid = pidLow | (pidHigh << 16);
+
+                    newPkmn->setPersonalityValue(pid);
+                    if(
+                        newPkmn->getAbilityFromPersonalityValue() == newPkmn->internalAbility &&
+                        newPkmn->getUnownLetter() == newPkmn->internalUnownLetter &&
+                        newPkmn->getNature() == newPkmn->internalNature &&
+                        newPkmn->getGender() == newPkmn->internalGender &&
+                        newPkmn->getSize() == newPkmn->internalSize
+                    )
+                    {
+                        if (getIsHatchable()){
+                            newPkmn->setIV(HP, (IVSeeds[0] >> 0) & 0b11111);
+                            newPkmn->setIV(ATTACK, (IVSeeds[0] >> 5) & 0b11111);
+                            newPkmn->setIV(DEFENSE, (IVSeeds[0] >> 10) & 0b11111);
+                            newPkmn->setIV(SPEED, (IVSeeds[1] >> 0) & 0b11111);
+                            newPkmn->setIV(SPECIAL_ATTACK, (IVSeeds[1] >> 5) & 0b11111);
+                            newPkmn->setIV(SPECIAL_DEFENSE, (IVSeeds[1] >> 10) & 0b11111);
+                            return true;
+                        }
+                        else
+                        {
+                            u16 IVSeed = newPkmn->getNextRand_u16();
+                            newPkmn->setIV(HP, (IVSeed >> 0) & 0b11111);
+                            newPkmn->setIV(ATTACK, (IVSeed >> 5) & 0b11111);
+                            newPkmn->setIV(DEFENSE, (IVSeed >> 10) & 0b11111);
+                            IVSeed = newPkmn->getNextRand_u16();
+                            newPkmn->setIV(SPEED, (IVSeed >> 0) & 0b11111);
+                            newPkmn->setIV(SPECIAL_ATTACK, (IVSeed >> 5) & 0b11111);
+                            newPkmn->setIV(SPECIAL_DEFENSE, (IVSeed >> 10) & 0b11111);
+                            return true;
+                        }
+
+                    }
+                }
+                currRand = ((currRand * 19) + 23) % (2 << 6);
+            }
         }
-        return true;
+        return false;
 
         case VIRTUAL:
         // The goal here is to set 3 (or 5) of the IVs to be perfect.
@@ -464,7 +554,7 @@ bool GBPokemon::generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionM
         default:
         // The original method set the IVs after the PID
         {
-            newPkmn->currRand = getPureRand();
+            newPkmn->currRand = getIndividualDataChecksum();
             u32 pid = 0;
             u16 seedA = 0;
             u16 seedB = 0;
@@ -800,7 +890,7 @@ bool GBPokemon::convertEVs(Gen3Pokemon *newPkmn, ConversionMethod method)
                 evs[SPEED] > 255 || evs[SPECIAL_ATTACK] > 255 || evs[SPECIAL_DEFENSE] > 255)
             {
                 // Pick the stat with the most EVs and lower it.
-                int largestStat;
+                int largestStat = 0;
                 int largestValue = 0;
                 for (int i = 0; i < 6; i++)
                 {
@@ -863,7 +953,6 @@ bool GBPokemon::convertMetLocation(Gen3Pokemon *newPkmn, ConversionMethod method
         // Because we are Legal, all of these Pokemon will be from FRLG.
         // They would get overwritten upon reaching HGSS anyway
         case LEGAL:
-            UnownLetter letter;
             switch(newPkmn->getSpeciesIndexNumber())
             {
                 // Mew and Celebi are not part of this because they will be overwitten by the event.
@@ -962,8 +1051,8 @@ bool GBPokemon::convertMetLevel(Gen3Pokemon *newPkmn, ConversionMethod method)
     {
         case LEGAL:
         {
-            int minLevel;
-            int minExp;
+            u32 minLevel;
+            u32 minExp;
             switch(newPkmn->getSpeciesIndexNumber())
             {
                 // Mew and Celebi are not part of this because they will be overwitten by the event.
@@ -1027,19 +1116,19 @@ bool GBPokemon::convertMetLevel(Gen3Pokemon *newPkmn, ConversionMethod method)
                     switch(pokeTable->EXP_GROUPS[newPkmn->getSpeciesIndexNumber()])
                     {
                         case EXP_MED_FAST:
-                            minLevel = 5;
+                            minLevel = 0;
                             minExp = 125; 
                         break;
                         case EXP_MED_SLOW:
-                            minLevel = 5;
+                            minLevel = 0;
                             minExp = 135;  
                         break;
                         case EXP_FAST:
-                            minLevel = 5;
+                            minLevel = 0;
                             minExp = 100;  
                         break;
                         case EXP_SLOW:
-                            minLevel = 5;
+                            minLevel = 0;
                             minExp = 156;  
                         break;
                         default:
@@ -1053,9 +1142,8 @@ bool GBPokemon::convertMetLevel(Gen3Pokemon *newPkmn, ConversionMethod method)
             if(minExp > newPkmn->getExpPoints())
             {
                 newPkmn->setExpPoints(minExp);
-                newPkmn->setLevelMet(minLevel);
-                return convertEXP(newPkmn, method); // We need to update the EXP, since the level changed.
             }
+            newPkmn->setLevelMet(minLevel);
         }
         return true;
 

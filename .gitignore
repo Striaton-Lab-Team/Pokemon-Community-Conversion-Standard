@@ -18,3 +18,4 @@ tools/table-generator/table-generator
 tools/bin2s/bin2s
 examples/convertPKs/inBox
 examples/convertPKs/outBox
+examples/convertPKs/convertPKs

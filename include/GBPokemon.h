@@ -111,7 +111,8 @@ public:
     Nature getVirtualConsoleNature();
     bool getIsShiny() override;
     bool externalConvertNickname(byte outputArray[]);
-
+    u32 getIndividualDataChecksum();
+    
     // And this is for all the conversion stuff
     bool convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, bool sanitizeMythicals=true);
     bool loadEvent(Gen3Pokemon *newPkmn, ConversionMethod method);
