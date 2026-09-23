@@ -3897,7 +3897,7 @@ const u8 POWER_POINTS[252]{
     30, // Vice-grip
     5,  // Guillotine
     10, // Razor-wind
-    20, // Swords-dance
+    30, // Swords-dance
     30, // Cut
     35, // Gust
     35, // Wing-attack
@@ -3905,11 +3905,11 @@ const u8 POWER_POINTS[252]{
     15, // Fly
     20, // Bind
     20, // Slam
-    25, // Vine-whip
+    10, // Vine-whip
     20, // Stomp
     30, // Double-kick
     5,  // Mega-kick
-    10, // Jump-kick
+    25, // Jump-kick
     15, // Rolling-kick
     15, // Sand-attack
     15, // Headbutt
@@ -3920,7 +3920,7 @@ const u8 POWER_POINTS[252]{
     15, // Body-slam
     20, // Wrap
     20, // Take-down
-    10, // Thrash
+    20, // Thrash
     15, // Double-edge
     30, // Tail-whip
     35, // Poison-sting
@@ -3949,21 +3949,21 @@ const u8 POWER_POINTS[252]{
     5,  // Hyper-beam
     35, // Peck
     20, // Drill-peck
-    20, // Submission
+    25, // Submission
     20, // Low-kick
     20, // Counter
     20, // Seismic-toss
     15, // Strength
-    25, // Absorb
-    15, // Mega-drain
+    20, // Absorb
+    10, // Mega-drain
     10, // Leech-seed
-    20, // Growth
+    40, // Growth
     25, // Razor-leaf
     10, // Solar-beam
     35, // Poison-powder
     30, // Stun-spore
     15, // Sleep-powder
-    10, // Petal-dance
+    20, // Petal-dance
     40, // String-shot
     10, // Dragon-rage
     15, // Fire-spin
@@ -3988,14 +3988,14 @@ const u8 POWER_POINTS[252]{
     10, // Mimic
     40, // Screech
     15, // Double-team
-    10, // Recover
+    20, // Recover
     30, // Harden
-    10, // Minimize
+    20, // Minimize
     20, // Smokescreen
     10, // Confuse-ray
     40, // Withdraw
     40, // Defense-curl
-    20, // Barrier
+    30, // Barrier
     30, // Light-screen
     30, // Haze
     20, // Reflect
@@ -4011,20 +4011,20 @@ const u8 POWER_POINTS[252]{
     20, // Bone-club
     5,  // Fire-blast
     15, // Waterfall
-    15, // Clamp
+    10, // Clamp
     20, // Swift
-    10, // Skull-bash
+    15, // Skull-bash
     15, // Spike-cannon
     35, // Constrict
     20, // Amnesia
     15, // Kinesis
     10, // Soft-boiled
-    10, // High-jump-kick
+    20, // High-jump-kick
     30, // Glare
     15, // Dream-eater
     40, // Poison-gas
     20, // Barrage
-    10, // Leech-life
+    15, // Leech-life
     10, // Lovely-kiss
     5,  // Sky-attack
     10, // Transform
@@ -4034,7 +4034,7 @@ const u8 POWER_POINTS[252]{
     20, // Flash
     15, // Psywave
     40, // Splash
-    20, // Acid-armor
+    40, // Acid-armor
     10, // Crabhammer
     5,  // Explosion
     15, // Fury-swipes
@@ -4051,7 +4051,7 @@ const u8 POWER_POINTS[252]{
     1,  // Struggle
     1,  // Sketch
     10, // Triple-kick
-    25, // Thief
+    10, // Thief
     10, // Spider-web
     5,  // Mind-reader
     15, // Nightmare
@@ -4083,9 +4083,9 @@ const u8 POWER_POINTS[252]{
     5,  // Detect
     10, // Bone-rush
     5,  // Lock-on
-    10, // Outrage
+    15, // Outrage
     10, // Sandstorm
-    10, // Giga-drain
+    5,  // Giga-drain
     10, // Endure
     20, // Charm
     20, // Rollout
@@ -4131,7 +4131,7 @@ const u8 POWER_POINTS[252]{
     5,  // Extreme-speed
     5,  // Ancient-power
     15, // Shadow-ball
-    10, // Future-sight
+    15, // Future-sight
     15, // Rock-smash
     15, // Whirlpool
     10, // Beat-up
