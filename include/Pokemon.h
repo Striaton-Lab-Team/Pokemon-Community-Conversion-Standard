@@ -59,10 +59,11 @@ public:
     virtual bool getIsShiny();
     bool getIsHatchable();
     bool getIsMythical();
-    bool getUsesBACD();
+    bool getReversesPID();
     bool getIsRoamer();
     bool getIsNido();
-    
+    bool getIsWildEncounter();
+
 #if ON_GBA
 #else
     virtual void print(std::ostream &os)

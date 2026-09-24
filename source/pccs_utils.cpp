@@ -169,18 +169,19 @@ void PCCSUtils::extractLehmerCode4(u32 n, u8 out[4])
     }
 }
 
-int PCCSUtils::reverseIVToSeed(u16 first, u16 second, u32 *values, bool isEvent)
+int PCCSUtils::reverseIVToSeed(u16 first, u16 second, u32 *values, RNGMethod conversion, bool isEvent)
 {
-    constexpr u32 GBA_LCG_MULT = 0x41C64E6D;
-    constexpr u32 GBA_LCG_ADD  = 0x6073;
+    // ABC_E has to reverse two steps instead of one, which is why we have different values for each
+    u32 GBA_LCG_MULT = (conversion != ABC_E) ? 0x41C64E6D : 0xC2A29A69;
+    u32 GBA_LCG_ADD  = (conversion != ABC_E) ? 0x00006073 : 0xE97E7B6A;
+
+    u32 GBA_REV_STEP = (conversion != ABC_E) ? 0x000067D3 : 0x00003A89;
+    u32 GBA_REV_PAT  = (conversion != ABC_E) ? 0x00000D3E : 0x00002E4C;
+    u32 GBA_REV_INC  = (conversion != ABC_E) ? 0x00004034 : 0x05259D3A;
 
     constexpr u32 GBA_LCG_REVERSE_MULT = 0xEEB9EB65;
     constexpr u32 GBA_LCG_REVERSE_ADD  = 0x0A3561A1;
 
-    constexpr u32 GBA_REV_STEP = 0x67D3;
-    constexpr u32 GBA_REV_PAT  = 0x0D3E;
-    constexpr u32 GBA_REV_INC  = 0x4034;
-    
     int count = 0;
     
     for (int i = 0; i < 4; i++)
@@ -189,8 +190,7 @@ int PCCSUtils::reverseIVToSeed(u16 first, u16 second, u32 *values, bool isEvent)
         u32 secondState = ((u32)second << 16) | ((i >> 1) & 0b1) << 31;
 
         u32 diff = (secondState - firstState * GBA_LCG_MULT) >> 16;
-
-        u32 low =((((diff * GBA_REV_STEP) + GBA_REV_INC) >> 16) * GBA_REV_PAT) % GBA_REV_STEP;
+        u32 low = ((((diff * GBA_REV_STEP) + GBA_REV_INC) >> 16) * GBA_REV_PAT) % GBA_REV_STEP;
 
         do
         {
@@ -202,12 +202,17 @@ int PCCSUtils::reverseIVToSeed(u16 first, u16 second, u32 *values, bool isEvent)
                 u32 previousState = state * GBA_LCG_REVERSE_MULT + GBA_LCG_REVERSE_ADD;
                 previousState = previousState * GBA_LCG_REVERSE_MULT + GBA_LCG_REVERSE_ADD;
                 previousState = previousState * GBA_LCG_REVERSE_MULT + GBA_LCG_REVERSE_ADD; // Do it thrice so we get the seed
+                if (conversion == A_CDE || conversion == AB_DE)
+                {
+                    previousState = previousState * GBA_LCG_REVERSE_MULT + GBA_LCG_REVERSE_ADD; // Do it again!
+                }
                 if(!isEvent || previousState < 0x10000) // If we have an event Pokemon, the seed needs to be 16 bits only.
                 {
                     values[count++] = previousState;
                 }
             }
             low += GBA_REV_STEP;
+
         } while (low < 0x10000);
     }
     return count;

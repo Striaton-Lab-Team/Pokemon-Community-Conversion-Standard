@@ -385,106 +385,123 @@ bool GBPokemon::generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionM
         case LEGAL:
         // The goal here is to maintain the DVs as IVs, just doubled and maybe +1, unless they are events
         {
-            newPkmn->currRand = getIndividualDataChecksum();
-            u32 seeds[12];
-
-            int currRand = newPkmn->getNextRand_u16() & 0b111111;
-            int currSeed = newPkmn->getNextRand_u16() & 0b1111;
-            for(int count = 0; count < 64; count++)
+            RNGMethod currMethod;
+            for (int methodsIndex = 0; methodsIndex < (getIsWildEncounter() ? NUM_RNG_METHODS : 1); methodsIndex++)
             {
-                u16 IVBits[2] = {0};
-                int val;
-                for (int i = 0; i < 6; i++)
+                if (getIsWildEncounter())
                 {
-                    val = getDV((Stat)(i < 5 ? i : 4)) * 2;
-                    val |= ((currRand >> i) & 0b1);
-                    IVBits[i / 3] |= (val & 0x1F) << (5 * (i % 3));
-                }
-                int num;
-                if (getIsHatchable() || (getIsMythical() && isEvent))
-                {
-                    num = INT32_MAX;
+                    currMethod = (RNGMethod)methodsIndex;
                 }
                 else
                 {
-                    num = PCCSUtils::reverseIVToSeed(IVBits[0], IVBits[1], seeds);
+                    currMethod = ABCD; // This is the most common one for static encounters, and should be all we need.
                 }
+                newPkmn->currRand = getIndividualDataChecksum();
+                u32 seeds[12];
 
-                for (int i = 0; i < 16; i++)
+                int currRand = newPkmn->getNextRand_u16() & 0b111111;
+                int currSeed = newPkmn->getNextRand_u16() & 0b1111;
+                for(int count = 0; count < 64; count++)
                 {
-                    if (currSeed < num || num == INT32_MAX)
+                    u16 IVBits[2] = {0};
+                    int val;
+                    for (int i = 0; i < 6; i++)
                     {
-                        if (getIsMythical() && isEvent)
-                        {
-                            newPkmn->currRand &= 0xFFFF; // Truncate for the event
-                        
-                        }
-                        else if(!getIsHatchable())
-                        {
-                            newPkmn->currRand = seeds[currSeed];
-                        }
-                        
-                        u16 pidLow = newPkmn->getNextRand_u16();
-                        u16 pidHigh = newPkmn->getNextRand_u16();
-                        u32 pid;
-                        if(getUsesBACD())
-                        {
-                            pid = pidHigh | (pidLow << 16);
-                        }
-                        else
-                        {
-                            pid = pidLow | (pidHigh << 16);
-                        }
+                        val = getDV((Stat)(i < 5 ? i : 4)) * 2;
+                        val |= ((currRand >> i) & 0b1);
+                        IVBits[i / 3] |= (val & 0x1F) << (5 * (i % 3));
+                    }
+                    int num;
+                    if (getIsHatchable() || (getIsMythical() && isEvent))
+                    {
+                        num = INT32_MAX;
+                    }
+                    else
+                    {
+                        num = PCCSUtils::reverseIVToSeed(IVBits[0], IVBits[1], seeds, currMethod);
+                    }
 
-                        newPkmn->setPersonalityValue(pid);
-                        if(
-                            newPkmn->getAbilityFromPersonalityValue() == newPkmn->internalAbility &&
-                            newPkmn->getUnownLetter() == newPkmn->internalUnownLetter &&
-                            newPkmn->getNature() == newPkmn->internalNature &&
-                            newPkmn->getGender() == newPkmn->internalGender &&
-                            newPkmn->getSize() == newPkmn->internalSize &&
-                            (!newPkmn->getIsNido() || ((newPkmn->getPersonalityValue() & 0x8000) >> 15) == newPkmn->getSpeciesIndexNumber() >= NIDORAN_M) // Check that the egg generation of the Nido's is correct
-                        )
+                    for (int i = 0; i < 16; i++)
+                    {
+                        if (currSeed < num || num == INT32_MAX)
                         {
-                            if (getIsHatchable()){
-                                newPkmn->setIV(HP, (IVBits[0] >> 0) & 0b11111);
-                                newPkmn->setIV(ATTACK, (IVBits[0] >> 5) & 0b11111);
-                                newPkmn->setIV(DEFENSE, (IVBits[0] >> 10) & 0b11111);
-                                newPkmn->setIV(SPEED, (IVBits[1] >> 0) & 0b11111);
-                                newPkmn->setIV(SPECIAL_ATTACK, (IVBits[1] >> 5) & 0b11111);
-                                newPkmn->setIV(SPECIAL_DEFENSE, (IVBits[1] >> 10) & 0b11111);
-                                return true;
-                            }
-                            else if (getIsRoamer())
+                            if (getIsMythical() && isEvent)
                             {
-                                u16 IVSeed = newPkmn->getNextRand_u16() & 0xFF;
-                                newPkmn->setIV(HP, (IVSeed >> 0) & 0b11111);
-                                newPkmn->setIV(ATTACK, (IVSeed >> 5) & 0b11111);
-                                newPkmn->setIV(DEFENSE, 0);
-
-                                newPkmn->setIV(SPEED, 0);
-                                newPkmn->setIV(SPECIAL_ATTACK, 0);
-                                newPkmn->setIV(SPECIAL_DEFENSE, 0);
-                                return true;
+                                newPkmn->currRand &= 0xFFFF; // Truncate for the event
+                            
+                            }
+                            else if(!getIsHatchable())
+                            {
+                                newPkmn->currRand = seeds[currSeed];
+                            }
+                            
+                            u16 pidLow = newPkmn->getNextRand_u16();
+                            if (currMethod == A_CDE)
+                            {
+                                newPkmn->getNextRand_u16();
+                            }
+                            u16 pidHigh = newPkmn->getNextRand_u16();
+                            u32 pid;
+                            if(getReversesPID())
+                            {
+                                pid = pidHigh | (pidLow << 16);
                             }
                             else
                             {
-                                u16 IVSeed = newPkmn->getNextRand_u16();
-                                newPkmn->setIV(HP, (IVSeed >> 0) & 0b11111);
-                                newPkmn->setIV(ATTACK, (IVSeed >> 5) & 0b11111);
-                                newPkmn->setIV(DEFENSE, (IVSeed >> 10) & 0b11111);
-                                IVSeed = newPkmn->getNextRand_u16();
-                                newPkmn->setIV(SPEED, (IVSeed >> 0) & 0b11111);
-                                newPkmn->setIV(SPECIAL_ATTACK, (IVSeed >> 5) & 0b11111);
-                                newPkmn->setIV(SPECIAL_DEFENSE, (IVSeed >> 10) & 0b11111);
-                                return true;
+                                pid = pidLow | (pidHigh << 16);
                             }
 
+                            newPkmn->setPersonalityValue(pid);
+                            if(
+                                newPkmn->getAbilityFromPersonalityValue() == newPkmn->internalAbility &&
+                                newPkmn->getUnownLetter() == newPkmn->internalUnownLetter &&
+                                newPkmn->getNature() == newPkmn->internalNature &&
+                                newPkmn->getGender() == newPkmn->internalGender &&
+                                newPkmn->getSize() == newPkmn->internalSize &&
+                                (!newPkmn->getIsNido() || ((newPkmn->getPersonalityValue() & 0x8000) >> 15) == newPkmn->getSpeciesIndexNumber() >= NIDORAN_M) // Check that the egg generation of the Nido's is correct
+                            )
+                            {
+                                if (getIsHatchable()){
+                                    newPkmn->setIV(HP, (IVBits[0] >> 0) & 0b11111);
+                                    newPkmn->setIV(ATTACK, (IVBits[0] >> 5) & 0b11111);
+                                    newPkmn->setIV(DEFENSE, (IVBits[0] >> 10) & 0b11111);
+                                    newPkmn->setIV(SPEED, (IVBits[1] >> 0) & 0b11111);
+                                    newPkmn->setIV(SPECIAL_ATTACK, (IVBits[1] >> 5) & 0b11111);
+                                    newPkmn->setIV(SPECIAL_DEFENSE, (IVBits[1] >> 10) & 0b11111);
+                                    return true;
+                                }
+                                else
+                                {
+                                                                        
+                                    if (currMethod == AB_DE)
+                                    {
+                                        newPkmn->getNextRand_u16();
+                                    }
+
+                                    u16 IVSeed;
+                                    IVSeed = newPkmn->getNextRand_u16() & (getIsRoamer() ? 0xFF : 0xFFFFFFFF);
+                                    newPkmn->setIV(HP, (IVSeed >> 0) & 0b11111);
+                                    newPkmn->setIV(ATTACK, (IVSeed >> 5) & 0b11111);
+                                    newPkmn->setIV(DEFENSE, (IVSeed >> 10) & 0b11111);
+
+                                    if (currMethod == ABC_E)
+                                    {
+                                        newPkmn->getNextRand_u16();
+                                    }
+
+                                    IVSeed = newPkmn->getNextRand_u16() & (getIsRoamer() ? 0 : 0xFFFFFFFF);
+                                    newPkmn->setIV(SPEED, (IVSeed >> 0) & 0b11111);
+                                    newPkmn->setIV(SPECIAL_ATTACK, (IVSeed >> 5) & 0b11111);
+                                    newPkmn->setIV(SPECIAL_DEFENSE, (IVSeed >> 10) & 0b11111);
+                                    return true;
+                                }
+
+                            }
                         }
+                        currSeed = ((currSeed * 5) + 1) % 16;
                     }
-                    currSeed = ((currSeed * 5) + 1) % 16;
+                    currRand = ((currRand * 17) + 23) % 64;
                 }
-                currRand = ((currRand * 17) + 23) % 64;
             }
         }
         return false;
@@ -538,7 +555,7 @@ bool GBPokemon::generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionM
                     }
                     else
                     {
-                        num = PCCSUtils::reverseIVToSeed(IVSeeds[0], IVSeeds[1], seeds);
+                        num = PCCSUtils::reverseIVToSeed(IVSeeds[0], IVSeeds[1], seeds, ABCD);
                     }
 
                     for (int i = 0; i < num; i++)

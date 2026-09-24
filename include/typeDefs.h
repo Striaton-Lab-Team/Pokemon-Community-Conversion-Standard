@@ -959,4 +959,14 @@ enum ConversionMethod
     VIRTUAL,
 };
 
+enum RNGMethod
+{
+    // These are ordered in wild encounter rarity. Really should only be a problem for Unown.
+    AB_DE,
+    ABC_E,
+    ABCD,
+    A_CDE,
+};
+#define NUM_RNG_METHODS 4
+
 #endif

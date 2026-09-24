@@ -49,7 +49,7 @@ bool Pokemon::getIsMythical()
     );
 }
 
-bool Pokemon::getUsesBACD()
+bool Pokemon::getReversesPID()
 {
     Species mon = (Species)getSpeciesIndexNumber();
     return (
@@ -80,6 +80,15 @@ bool Pokemon::getIsNido()
         mon == NIDORINO ||
         mon == NIDOKING
         );
+}
+
+bool Pokemon::getIsWildEncounter()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == DITTO ||
+        mon == UNOWN
+    );
 }
 
 u32 Pokemon::getVar(const DataVarInfo& dataVar)

@@ -70,7 +70,7 @@ TEST_CASE("Basic gen2-gen3 conversion test", "[unit][gen2][gen3][conversion]")
     cyndaquil.loadData(ENGLISH, cyndaquil_data, cyndaquil_name, cyndaquil_ot, cyndaquil_id);
 
     Gen3Pokemon convertedCyndaquil(&table);
-    REQUIRE(cyndaquil.convertToGen3(&convertedCyndaquil, FAITHFUL, true) == true);
+    REQUIRE(cyndaquil.convertToGen3(&convertedCyndaquil, LEGAL, true) == true);
 
     REQUIRE(convertedCyndaquil.getTrainerID() == 7465);
     REQUIRE(convertedCyndaquil.getSecretID() == 0);
@@ -82,14 +82,14 @@ TEST_CASE("Basic gen2-gen3 conversion test", "[unit][gen2][gen3][conversion]")
     REQUIRE(convertedCyndaquil.getMarkings() == 0);
     REQUIRE(convertedCyndaquil.getSpeciesIndexNumber() == 0x9B);
     REQUIRE(convertedCyndaquil.getHeldItem() == 0);
-    REQUIRE(convertedCyndaquil.getExpPoints() == 179);
+    REQUIRE(convertedCyndaquil.getExpPoints() == 205);
     REQUIRE(convertedCyndaquil.getFriendship() == 70);
-    REQUIRE(convertedCyndaquil.getEV(HP) == 0);
-    REQUIRE(convertedCyndaquil.getEV(ATTACK) == 0);
-    REQUIRE(convertedCyndaquil.getEV(DEFENSE) == 0);
-    REQUIRE(convertedCyndaquil.getEV(SPECIAL_ATTACK) == 0);
-    REQUIRE(convertedCyndaquil.getEV(SPECIAL_DEFENSE) == 0);
-    REQUIRE(convertedCyndaquil.getEV(SPEED) == 0);
+    REQUIRE(convertedCyndaquil.getEV(HP) == 8);
+    REQUIRE(convertedCyndaquil.getEV(ATTACK) == 8);
+    REQUIRE(convertedCyndaquil.getEV(DEFENSE) == 8);
+    REQUIRE(convertedCyndaquil.getEV(SPECIAL_ATTACK) == 4);
+    REQUIRE(convertedCyndaquil.getEV(SPECIAL_DEFENSE) == 4);
+    REQUIRE(convertedCyndaquil.getEV(SPEED) == 4);
     REQUIRE(convertedCyndaquil.getContestCondition(COOLNESS) == 0);
     REQUIRE(convertedCyndaquil.getContestCondition(BEAUTY) == 0);
     REQUIRE(convertedCyndaquil.getContestCondition(CUTENESS) == 0);
@@ -110,9 +110,9 @@ TEST_CASE("Basic gen2-gen3 conversion test", "[unit][gen2][gen3][conversion]")
     REQUIRE(convertedCyndaquil.getPPUpNum(3) == 0);
     REQUIRE(convertedCyndaquil.getPokerusStrain() == 0);
     REQUIRE(convertedCyndaquil.getPokerusDaysRemaining() == 0);
-    REQUIRE(convertedCyndaquil.getMetLocation() == 255);
-    REQUIRE(convertedCyndaquil.getLevelMet() == 6);
-    REQUIRE(convertedCyndaquil.getGameOfOrigin() == 7);
+    REQUIRE(convertedCyndaquil.getMetLocation() == 88);
+    REQUIRE(convertedCyndaquil.getLevelMet() == 0);
+    REQUIRE(convertedCyndaquil.getGameOfOrigin() == 4);
     REQUIRE(convertedCyndaquil.getPokeballCaughtIn() == 4);
     REQUIRE(convertedCyndaquil.getOriginalTrainerGender() == 0);
     REQUIRE(convertedCyndaquil.getIsEgg() == false);
