@@ -3324,7 +3324,7 @@ const bool NUM_ABILITIES[POKEMON_ARRAY_SIZE] = {
     1, // Gligar            Hyper Cutter/Sand Veil
     1, // Steelix           Rock Head/Sturdy
     1, // Snubbull          Intimidate/Run Away
-    0, // Granbull          Intimidate
+    1, // Granbull          Intimidate/Intimidate (Granbull is the only Gen 1/2 Pokemon in Gen 3 to have "1" ability while the prevolution has 2. Technically it needs to also have 2 abilities.)
     1, // Qwilfish          Poison Point/Swift Swim
     0, // Scizor            Swarm
     0, // Shuckle           Sturdy

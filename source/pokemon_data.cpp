@@ -230,8 +230,8 @@ const u32 EXP_MAXIMUMS[6]{med_fast_max,
     0, // flux_max
     med_slow_max, fast_max, slow_max};
 
-const int GENDER_THRESHOLDS[2][8]{
-    {-1, 2, 4, 8, 12, 14, -1, -1}, {-1, 31, 63, 127, 191, 225, -1, -1}};
+const u8 GENDER_THRESHOLDS[2][8]{
+    {0, 2, 4, 8, 12, 14, 16, 255}, {0, 31, 63, 127, 191, 225, 254, 255}};
 
 const byte MOVESETS[POKEMON_ARRAY_SIZE][32]{
     // This data is stored as 32 bytes of binary data per Pokemon, depending on

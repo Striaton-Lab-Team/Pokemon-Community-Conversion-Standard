@@ -12,14 +12,14 @@
 #include "Gen3Pokemon.h"
 
 
-std::string inputBox = "inBox";
+std::string inputBox = "inBox-gen1";
 std::string outputBox = "outBox";
-int generation = 2;
-Language language = ENGLISH;
+int generation = 1;
+Language language = FRENCH;
 ConversionMethod method = LEGAL;
 
 bool printPokemon = false;
-bool sanitizeMythicals = false;
+bool sanitizeMythicals = true;
 
 
 int convert(std::string inputPath, std::string outputPath)

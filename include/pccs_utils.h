@@ -162,7 +162,7 @@ void extractLehmerCode4(u32 n, u8 out[4]);
 // ie output -> XXXXXXXXXXXXXXXX | first -> XXXXXXXXXXXXXXXX | second
 // Will never exceed 3
 // Based on Lorenzooone's implementation in Gen3 to GenX: https://github.com/Lorenzooone/Pokemon-Gen3-to-Gen-X/blob/main/include/pid_iv_tid.h
-int reverseIVForPID(u16 first, u16 second, u32 *values);
+int reverseIVToSeed(u16 first, u16 second, u32 *values, bool isEvent=false);
 
 /**
  * @brief Determine a game type based on a string parameter. The comparison is case-insensitive.

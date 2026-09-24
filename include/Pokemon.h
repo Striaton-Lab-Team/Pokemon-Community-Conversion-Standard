@@ -58,7 +58,11 @@ public:
     virtual UnownLetter getUnownLetter();
     virtual bool getIsShiny();
     bool getIsHatchable();
-
+    bool getIsMythical();
+    bool getUsesBACD();
+    bool getIsRoamer();
+    bool getIsNido();
+    
 #if ON_GBA
 #else
     virtual void print(std::ostream &os)

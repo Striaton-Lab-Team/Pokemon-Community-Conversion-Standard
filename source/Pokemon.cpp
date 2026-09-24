@@ -40,6 +40,48 @@ bool Pokemon::getIsHatchable()
     );
 }
 
+bool Pokemon::getIsMythical()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == MEW ||
+        mon == CELEBI
+    );
+}
+
+bool Pokemon::getUsesBACD()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == MEW ||
+        mon == UNOWN ||
+        mon == CELEBI
+    );
+}
+
+bool Pokemon::getIsRoamer()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == RAIKOU ||
+        mon == ENTEI ||
+        mon == SUICUNE
+    );
+}
+
+bool Pokemon::getIsNido()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == NIDORAN_F ||
+        mon == NIDORINA ||
+        mon == NIDOQUEEN ||
+        mon == NIDORAN_M ||
+        mon == NIDORINO ||
+        mon == NIDOKING
+        );
+}
+
 u32 Pokemon::getVar(const DataVarInfo& dataVar)
 {
     return getVar(dataVar, 0);

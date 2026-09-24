@@ -154,14 +154,14 @@ Gender GBPokemon::getGender()
 {
     byte index = getSpeciesIndexNumber();
     u32 threshold = pokeTable->get_gender_threshold(index, false);
-
+    
     if (threshold == 255)
     {
         return GENDERLESS;
     }
     else
     {
-        if (getDV(ATTACK) <= threshold)
+        if (getDV(ATTACK) < threshold)
         {
             return FEMALE;
         }
@@ -215,11 +215,11 @@ bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, boo
             case FAITHFUL:
                 sanitizeMythicals = false;
             break;
-            case LEGAL:
             case VIRTUAL:
                 sanitizeMythicals = true;
             break;
-
+            
+            case LEGAL:
             default:
                 // Use the sanitize variable that was passed in
             break;
@@ -251,6 +251,7 @@ bool GBPokemon::loadEvent(Gen3Pokemon *newPkmn, ConversionMethod method)
         newPkmn->setMetLocation(0xFF); // Fateful Encounter
         newPkmn->setLevelMet(10);
         newPkmn->setSecretID(00000);
+        newPkmn->setOriginalTrainerGender(newPkmn->getNextRand_u32() >> 16);
         if (newPkmn->getExpPoints() < 560) // 560 is level 10 for Mew
         {
             newPkmn->setExpPoints(560);
@@ -283,6 +284,7 @@ bool GBPokemon::loadEvent(Gen3Pokemon *newPkmn, ConversionMethod method)
         newPkmn->setFatefulEncounterObedience(false);
         newPkmn->setMetLocation(0xFF); // Fateful Encounter
         newPkmn->setSecretID(0);
+        newPkmn->setOriginalTrainerGender(newPkmn->getNextRand_u32() >> 16);
 
         byte jpnOT[] = {0x70, 0x62, 0x78, 0x7E, 0xFF, 0x00, 0x00};
         byte engOT[] = {0xA2, 0xA1, 0x00, 0xBB, 0xC8, 0xC3, 0xD0};
@@ -372,6 +374,7 @@ u32 GBPokemon::getIndividualDataChecksum()
     {
         out |= getSpeciesIndexNumber();
     }
+    return out;
 }
 
 bool GBPokemon::generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionMethod method, bool isEvent)
@@ -382,80 +385,106 @@ bool GBPokemon::generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionM
         case LEGAL:
         // The goal here is to maintain the DVs as IVs, just doubled and maybe +1, unless they are events
         {
-            u32 seeds[3];
+            newPkmn->currRand = getIndividualDataChecksum();
+            u32 seeds[12];
 
             int currRand = newPkmn->getNextRand_u16() & 0b111111;
-            for(int count = 0; count < (2 << 6); count++)
+            int currSeed = newPkmn->getNextRand_u16() & 0b1111;
+            for(int count = 0; count < 64; count++)
             {
-                u16 IVSeeds[2] = {0};
+                u16 IVBits[2] = {0};
                 int val;
                 for (int i = 0; i < 6; i++)
                 {
                     val = getDV((Stat)(i < 5 ? i : 4)) * 2;
                     val |= ((currRand >> i) & 0b1);
-                    IVSeeds[i / 3] |= (val & 0x1F) << (5 * (i % 3));
+                    IVBits[i / 3] |= (val & 0x1F) << (5 * (i % 3));
                 }
                 int num;
-                if (getIsHatchable())
+                if (getIsHatchable() || (getIsMythical() && isEvent))
                 {
                     num = INT32_MAX;
                 }
                 else
                 {
-                    num = PCCSUtils::reverseIVForPID(IVSeeds[0], IVSeeds[1], seeds);
+                    num = PCCSUtils::reverseIVToSeed(IVBits[0], IVBits[1], seeds);
                 }
 
-                for (int i = 0; i < num; i++)
+                for (int i = 0; i < 16; i++)
                 {
-                    u32 pidHighSeed;
-                    if (getIsHatchable())
+                    if (currSeed < num || num == INT32_MAX)
                     {
-                        pidHighSeed = getPureRand();
-                    }
-                    else
-                    {
-                        pidHighSeed = seeds[i];
-                    }
-                    
-                    u16 pidHigh = pidHighSeed >> 16;
-                    newPkmn->currRand = pidHighSeed;
-                    u16 pidLow = newPkmn->getNextRand_u16();
-                    u32 pid = pidLow | (pidHigh << 16);
-
-                    newPkmn->setPersonalityValue(pid);
-                    if(
-                        newPkmn->getAbilityFromPersonalityValue() == newPkmn->internalAbility &&
-                        newPkmn->getUnownLetter() == newPkmn->internalUnownLetter &&
-                        newPkmn->getNature() == newPkmn->internalNature &&
-                        newPkmn->getGender() == newPkmn->internalGender &&
-                        newPkmn->getSize() == newPkmn->internalSize
-                    )
-                    {
-                        if (getIsHatchable()){
-                            newPkmn->setIV(HP, (IVSeeds[0] >> 0) & 0b11111);
-                            newPkmn->setIV(ATTACK, (IVSeeds[0] >> 5) & 0b11111);
-                            newPkmn->setIV(DEFENSE, (IVSeeds[0] >> 10) & 0b11111);
-                            newPkmn->setIV(SPEED, (IVSeeds[1] >> 0) & 0b11111);
-                            newPkmn->setIV(SPECIAL_ATTACK, (IVSeeds[1] >> 5) & 0b11111);
-                            newPkmn->setIV(SPECIAL_DEFENSE, (IVSeeds[1] >> 10) & 0b11111);
-                            return true;
+                        if (getIsMythical() && isEvent)
+                        {
+                            newPkmn->currRand &= 0xFFFF; // Truncate for the event
+                        
+                        }
+                        else if(!getIsHatchable())
+                        {
+                            newPkmn->currRand = seeds[currSeed];
+                        }
+                        
+                        u16 pidLow = newPkmn->getNextRand_u16();
+                        u16 pidHigh = newPkmn->getNextRand_u16();
+                        u32 pid;
+                        if(getUsesBACD())
+                        {
+                            pid = pidHigh | (pidLow << 16);
                         }
                         else
                         {
-                            u16 IVSeed = newPkmn->getNextRand_u16();
-                            newPkmn->setIV(HP, (IVSeed >> 0) & 0b11111);
-                            newPkmn->setIV(ATTACK, (IVSeed >> 5) & 0b11111);
-                            newPkmn->setIV(DEFENSE, (IVSeed >> 10) & 0b11111);
-                            IVSeed = newPkmn->getNextRand_u16();
-                            newPkmn->setIV(SPEED, (IVSeed >> 0) & 0b11111);
-                            newPkmn->setIV(SPECIAL_ATTACK, (IVSeed >> 5) & 0b11111);
-                            newPkmn->setIV(SPECIAL_DEFENSE, (IVSeed >> 10) & 0b11111);
-                            return true;
+                            pid = pidLow | (pidHigh << 16);
                         }
 
+                        newPkmn->setPersonalityValue(pid);
+                        if(
+                            newPkmn->getAbilityFromPersonalityValue() == newPkmn->internalAbility &&
+                            newPkmn->getUnownLetter() == newPkmn->internalUnownLetter &&
+                            newPkmn->getNature() == newPkmn->internalNature &&
+                            newPkmn->getGender() == newPkmn->internalGender &&
+                            newPkmn->getSize() == newPkmn->internalSize &&
+                            (!newPkmn->getIsNido() || ((newPkmn->getPersonalityValue() & 0x8000) >> 15) == newPkmn->getSpeciesIndexNumber() >= NIDORAN_M) // Check that the egg generation of the Nido's is correct
+                        )
+                        {
+                            if (getIsHatchable()){
+                                newPkmn->setIV(HP, (IVBits[0] >> 0) & 0b11111);
+                                newPkmn->setIV(ATTACK, (IVBits[0] >> 5) & 0b11111);
+                                newPkmn->setIV(DEFENSE, (IVBits[0] >> 10) & 0b11111);
+                                newPkmn->setIV(SPEED, (IVBits[1] >> 0) & 0b11111);
+                                newPkmn->setIV(SPECIAL_ATTACK, (IVBits[1] >> 5) & 0b11111);
+                                newPkmn->setIV(SPECIAL_DEFENSE, (IVBits[1] >> 10) & 0b11111);
+                                return true;
+                            }
+                            else if (getIsRoamer())
+                            {
+                                u16 IVSeed = newPkmn->getNextRand_u16() & 0xFF;
+                                newPkmn->setIV(HP, (IVSeed >> 0) & 0b11111);
+                                newPkmn->setIV(ATTACK, (IVSeed >> 5) & 0b11111);
+                                newPkmn->setIV(DEFENSE, 0);
+
+                                newPkmn->setIV(SPEED, 0);
+                                newPkmn->setIV(SPECIAL_ATTACK, 0);
+                                newPkmn->setIV(SPECIAL_DEFENSE, 0);
+                                return true;
+                            }
+                            else
+                            {
+                                u16 IVSeed = newPkmn->getNextRand_u16();
+                                newPkmn->setIV(HP, (IVSeed >> 0) & 0b11111);
+                                newPkmn->setIV(ATTACK, (IVSeed >> 5) & 0b11111);
+                                newPkmn->setIV(DEFENSE, (IVSeed >> 10) & 0b11111);
+                                IVSeed = newPkmn->getNextRand_u16();
+                                newPkmn->setIV(SPEED, (IVSeed >> 0) & 0b11111);
+                                newPkmn->setIV(SPECIAL_ATTACK, (IVSeed >> 5) & 0b11111);
+                                newPkmn->setIV(SPECIAL_DEFENSE, (IVSeed >> 10) & 0b11111);
+                                return true;
+                            }
+
+                        }
                     }
+                    currSeed = ((currSeed * 5) + 1) % 16;
                 }
-                currRand = ((currRand * 19) + 23) % (2 << 6);
+                currRand = ((currRand * 17) + 23) % 64;
             }
         }
         return false;
@@ -465,6 +494,9 @@ bool GBPokemon::generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionM
         // First, we roll which IVs should be perfect. From there we fill each non-perfect IV with a random value, and reverse the RNG.
         // If we get a match, great. If we don't, re roll the non-perfect IVs, up to 4 times per non-perfect IV we have.
         // If none of those match, roll which IVs should be perfect again.
+
+        // THIS IS NOT FINISHED, DO NOT USE!!!
+        while(true){};
         {
         #define MAX_ROLLS_PER_IV 4
             int numPerfect = 3;
@@ -506,7 +538,7 @@ bool GBPokemon::generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionM
                     }
                     else
                     {
-                        num = PCCSUtils::reverseIVForPID(IVSeeds[0], IVSeeds[1], seeds);
+                        num = PCCSUtils::reverseIVToSeed(IVSeeds[0], IVSeeds[1], seeds);
                     }
 
                     for (int i = 0; i < num; i++)
@@ -554,7 +586,7 @@ bool GBPokemon::generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionM
         default:
         // The original method set the IVs after the PID
         {
-            newPkmn->currRand = getIndividualDataChecksum();
+            newPkmn->currRand = getPureRand();
             u32 pid = 0;
             u16 seedA = 0;
             u16 seedB = 0;
@@ -880,6 +912,7 @@ bool GBPokemon::convertEVs(Gen3Pokemon *newPkmn, ConversionMethod method)
                 total += evs[i];
             }
             evs[SPECIAL_DEFENSE] = evs[SPECIAL_ATTACK];
+            total += evs[SPECIAL_DEFENSE];
 
             
             while(
@@ -901,6 +934,7 @@ bool GBPokemon::convertEVs(Gen3Pokemon *newPkmn, ConversionMethod method)
                     }
                 }
                 evs[largestStat] -= 4;
+                total -= 4;
             }
 
         for (int i = 0; i < 6; i++)
@@ -1055,7 +1089,6 @@ bool GBPokemon::convertMetLevel(Gen3Pokemon *newPkmn, ConversionMethod method)
             u32 minExp;
             switch(newPkmn->getSpeciesIndexNumber())
             {
-                // Mew and Celebi are not part of this because they will be overwitten by the event.
                 case DITTO:
                     // Route 14
                     minLevel = 23;
@@ -1080,6 +1113,10 @@ bool GBPokemon::convertMetLevel(Gen3Pokemon *newPkmn, ConversionMethod method)
                     // Cerulean Cave
                     minLevel = 70;
                     minExp = 428750;
+                break;
+                case MEW: // Set met level to current level
+                    minLevel = getLevel();
+                    minExp = getExpPoints();
                 break;
                 case UNOWN:
                     // Tanoby Chambers(ish)
@@ -1110,6 +1147,10 @@ bool GBPokemon::convertMetLevel(Gen3Pokemon *newPkmn, ConversionMethod method)
                     // Navel Rock
                     minLevel = 70;
                     minExp = 428750;
+                break;
+                case CELEBI: // Set met level to current level
+                    minLevel = getLevel();
+                    minExp = getExpPoints();
                 break;
                 default:
                     pokeTable->load_exp_groups();
@@ -1215,14 +1256,15 @@ bool GBPokemon::convertTrainerGender(Gen3Pokemon *newPkmn, ConversionMethod meth
 
 bool GBPokemon::convertAbilityFlag(Gen3Pokemon *newPkmn)
 {
-    newPkmn->setAbility(newPkmn->getPersonalityValue() & 0b1);
+    u32 pid = newPkmn->getPersonalityValue();
+    newPkmn->setAbility(pid & 0b1);
     return true;
 }
 
 bool GBPokemon::convertRibbonsAndObedience(Gen3Pokemon *newPkmn)
 {
     Species speciesIndexNumber = (Species)getSpeciesIndexNumber();
-    if (speciesIndexNumber == MEW || speciesIndexNumber == CELEBI)
+    if (speciesIndexNumber == MEW || speciesIndexNumber == LUGIA || speciesIndexNumber == HO_OH || speciesIndexNumber == CELEBI)
     {
         newPkmn->setFatefulEncounterObedience(true);
     }
@@ -1291,7 +1333,7 @@ bool GBPokemon::setRequestedSize(Gen3Pokemon *newPkmn, ConversionMethod method)
         case LEGAL:
             if (newPkmn->getSpeciesIndexNumber() == MAGIKARP)
             {
-                newPkmn->internalSize = 0; // TODO: funny Magikarp conversion
+                newPkmn->internalSize = ANY_VALUE; // TODO: funny Magikarp conversion
                 return true;
             }
         case VIRTUAL:
