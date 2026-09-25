@@ -139,7 +139,7 @@ public:
     bool convertPokeball(Gen3Pokemon *newPkmn);
     bool convertTrainerGender(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertAbilityFlag(PokemonTables *pokeTable, Gen3Pokemon *newPkmn);
-    bool convertRibbonsAndObedience(Gen3Pokemon *newPkmn);
+    bool convertRibbonsAndObedience(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertShininess(Gen3Pokemon *newPkmn);
     // Extra
     bool setRequestedLetter(Gen3Pokemon *newPkmn);

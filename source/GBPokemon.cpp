@@ -206,7 +206,7 @@ bool GBPokemon::convertToGen3(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, Co
         convertPokerus(newPkmn, method) && convertMetLocation(newPkmn, method) &&
         convertMetLevel(pokeTable, newPkmn, method) && convertGameOfOrigin(newPkmn, method) &&
         convertPokeball(newPkmn) && convertTrainerGender(newPkmn, method) &&
-        convertAbilityFlag(pokeTable, newPkmn) && convertRibbonsAndObedience(newPkmn) && convertShininess(newPkmn);
+        convertAbilityFlag(pokeTable, newPkmn) && convertRibbonsAndObedience(newPkmn, method) && convertShininess(newPkmn);
 
     if ((getSpeciesIndexNumber() == MEW || getSpeciesIndexNumber() == CELEBI))
     {
@@ -1278,14 +1278,27 @@ bool GBPokemon::convertAbilityFlag(PokemonTables *pokeTable, Gen3Pokemon *newPkm
     return true;
 }
 
-bool GBPokemon::convertRibbonsAndObedience(Gen3Pokemon *newPkmn)
+bool GBPokemon::convertRibbonsAndObedience(Gen3Pokemon *newPkmn, ConversionMethod method)
 {
     Species speciesIndexNumber = (Species)getSpeciesIndexNumber();
-    if (speciesIndexNumber == MEW || speciesIndexNumber == LUGIA || speciesIndexNumber == HO_OH || speciesIndexNumber == CELEBI)
+    switch (method)
     {
-        newPkmn->setFatefulEncounterObedience(true);
+        case FAITHFUL:
+        case LEGAL:
+        case VIRTUAL:
+           if (speciesIndexNumber == MEW || speciesIndexNumber == LUGIA || speciesIndexNumber == HO_OH || speciesIndexNumber == CELEBI)
+            {
+                newPkmn->setFatefulEncounterObedience(true);
+            }
+        return true;
+
+        default:
+           if (speciesIndexNumber == MEW || speciesIndexNumber == CELEBI)
+            {
+                newPkmn->setFatefulEncounterObedience(true);
+            }
+        return true;
     }
-    return true;
 };
 
 bool GBPokemon::setRequestedLetter(Gen3Pokemon *newPkmn)
@@ -1303,11 +1316,11 @@ bool GBPokemon::setRequestedNature(Gen3Pokemon *newPkmn, ConversionMethod method
         return true;
 
         case LEGAL:
-        default:
             newPkmn->internalNature = ANY_NATURE;
         return true;
 
         case VIRTUAL:
+        default:
             newPkmn->internalNature = getVirtualConsoleNature();
         return true;
     }
