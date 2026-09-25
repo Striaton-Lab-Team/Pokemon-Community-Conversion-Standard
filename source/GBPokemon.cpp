@@ -191,7 +191,7 @@ bool GBPokemon::convertToGen3(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, Co
         // Start with things that effect the PID
         convertSpeciesIndexNumber(newPkmn) && setRequestedLetter(newPkmn) &&
         setRequestedNature(newPkmn, method) && setRequestedGender(pokeTable, newPkmn) &&
-        setRequestedAbility(newPkmn, method) && setRequestedSize(newPkmn, method) &&
+        setRequestedAbility(pokeTable, newPkmn, method) && setRequestedSize(newPkmn, method) &&
 
         // Then set the PID and IVs
         generatePersonalityValueAndIVs(pokeTable, newPkmn, method, false) &&
@@ -204,9 +204,9 @@ bool GBPokemon::convertToGen3(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, Co
         convertFriendship(newPkmn) && convertMoves(pokeTable, newPkmn, method) &&
         convertEVs(newPkmn, method) && convertContestConditions(newPkmn) &&
         convertPokerus(newPkmn, method) && convertMetLocation(newPkmn, method) &&
-        convertMetLevel(newPkmn, method) && convertGameOfOrigin(newPkmn, method) &&
+        convertMetLevel(pokeTable, newPkmn, method) && convertGameOfOrigin(newPkmn, method) &&
         convertPokeball(newPkmn) && convertTrainerGender(newPkmn, method) &&
-        convertAbilityFlag(newPkmn) && convertRibbonsAndObedience(newPkmn) && convertShininess(newPkmn);
+        convertAbilityFlag(pokeTable, newPkmn) && convertRibbonsAndObedience(newPkmn) && convertShininess(newPkmn);
 
     if ((getSpeciesIndexNumber() == MEW || getSpeciesIndexNumber() == CELEBI))
     {
@@ -456,7 +456,7 @@ bool GBPokemon::generatePersonalityValueAndIVs(PokemonTables *pokeTable, Gen3Pok
                                 newPkmn->getAbilityFromPersonalityValue() == newPkmn->internalAbility &&
                                 newPkmn->getUnownLetter() == newPkmn->internalUnownLetter &&
                                 newPkmn->getNature() == newPkmn->internalNature &&
-                                newPkmn->getGender() == newPkmn->internalGender &&
+                                newPkmn->getGender(pokeTable) == newPkmn->internalGender &&
                                 newPkmn->getSize() == newPkmn->internalSize &&
                                 (!newPkmn->getIsNido() || ((newPkmn->getPersonalityValue() & 0x8000) >> 15) == newPkmn->getSpeciesIndexNumber() >= NIDORAN_M) // Check that the egg generation of the Nido's is correct
                             )
@@ -580,7 +580,7 @@ bool GBPokemon::generatePersonalityValueAndIVs(PokemonTables *pokeTable, Gen3Pok
                             newPkmn->getAbilityFromPersonalityValue() == newPkmn->internalAbility &&
                             newPkmn->getUnownLetter() == newPkmn->internalUnownLetter &&
                             newPkmn->getNature() == newPkmn->internalNature &&
-                            newPkmn->getGender() == newPkmn->internalGender &&
+                            newPkmn->getGender(pokeTable) == newPkmn->internalGender &&
                             newPkmn->getSize() == newPkmn->internalSize
                         )
                         {
@@ -1096,7 +1096,7 @@ bool GBPokemon::convertMetLocation(Gen3Pokemon *newPkmn, ConversionMethod method
     }
 }
 
-bool GBPokemon::convertMetLevel(Gen3Pokemon *newPkmn, ConversionMethod method)
+bool GBPokemon::convertMetLevel(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method)
 {
     switch(method)
     {
@@ -1273,8 +1273,8 @@ bool GBPokemon::convertTrainerGender(Gen3Pokemon *newPkmn, ConversionMethod meth
 
 bool GBPokemon::convertAbilityFlag(PokemonTables *pokeTable, Gen3Pokemon *newPkmn)
 {
-    u32 pid = pokeTable, newPkmn->getPersonalityValue();
-    newPkmn->setAbility(pid & 0b1);
+    u32 pid = newPkmn->getPersonalityValue();
+    newPkmn->setAbility(pokeTable, pid & 0b1);
     return true;
 }
 
@@ -1319,7 +1319,7 @@ bool GBPokemon::setRequestedGender(PokemonTables *pokeTable, Gen3Pokemon *newPkm
     return true;
 };
 
-bool GBPokemon::setRequestedAbility(Gen3Pokemon *newPkmn, ConversionMethod method)
+bool GBPokemon::setRequestedAbility(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method)
 {
     switch(method)
     {
