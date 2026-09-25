@@ -3,6 +3,11 @@
 
 #include "Pokemon.h"
 
+#if ON_GBA
+#else
+#include <array>
+#endif
+
 static const u32 GEN3_PKMN_DATA_SUBSTRUCT_OFFSET = 0x20;
 
 class Gen3Pokemon : public Pokemon // The class for gen 3 Pokemon
@@ -20,8 +25,10 @@ public:
     u16 getNextRand_u16();
     u16 getPrevRand_u16();
 
+    int reverseRand(u16 first, u16 second, u32 *values);
+
     // These are stored internally so that they can be set by different functions
-    byte internalUnownLetter;
+    UnownLetter internalUnownLetter;
     Nature internalNature;
     Gender internalGender;
     int internalSize;
@@ -184,6 +191,7 @@ protected:
 public:
     void print(PokemonTables *pokeTable, std::ostream &os);
     std::string printDataArray(bool encrypedData);
+    std::array<byte, 80> outputByteArray(bool encrypedData, bool standardizeSubstruct);
 #endif
 
 public:
@@ -276,9 +284,11 @@ public:
 
     void updateSubstructureOrder(bool shouldMove);
 
+    void resetSubstructureOrder();
+
     void updateSecurityData();
 
-    byte getUnownLetter() override;
+    UnownLetter getUnownLetter() override;
     Nature getNature();
     Gender getGender(PokemonTables *pokeTable);
     int getAbilityFromPersonalityValue();

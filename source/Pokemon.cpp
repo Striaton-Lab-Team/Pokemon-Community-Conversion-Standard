@@ -10,14 +10,85 @@ u32 Pokemon::getSpeciesIndexNumber()
     return 0;
 }
 
-byte Pokemon::getUnownLetter()
+UnownLetter Pokemon::getUnownLetter()
 {
-    return 0;
+    return NO_LETTER;
 }
 
 bool Pokemon::getIsShiny()
 {
     return false;
+}
+
+bool Pokemon::getIsHatchable()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon != DITTO && 
+        mon != ARTICUNO &&
+        mon != MOLTRES &&
+        mon != ZAPDOS &&
+        mon != MEWTWO &&
+        mon != MEW &&
+        mon != UNOWN &&
+        mon != RAIKOU &&
+        mon != ENTEI &&
+        mon != SUICUNE &&
+        mon != LUGIA &&
+        mon != HO_OH &&
+        mon != CELEBI
+    );
+}
+
+bool Pokemon::getIsMythical()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == MEW ||
+        mon == CELEBI
+    );
+}
+
+bool Pokemon::getReversesPID()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == MEW ||
+        mon == UNOWN ||
+        mon == CELEBI
+    );
+}
+
+bool Pokemon::getIsRoamer()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == RAIKOU ||
+        mon == ENTEI ||
+        mon == SUICUNE
+    );
+}
+
+bool Pokemon::getIsNido()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == NIDORAN_F ||
+        mon == NIDORINA ||
+        mon == NIDOQUEEN ||
+        mon == NIDORAN_M ||
+        mon == NIDORINO ||
+        mon == NIDOKING
+        );
+}
+
+bool Pokemon::getIsWildEncounter()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == DITTO ||
+        mon == UNOWN
+    );
 }
 
 u32 Pokemon::getVar(const DataVarInfo& dataVar)

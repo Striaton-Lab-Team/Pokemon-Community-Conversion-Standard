@@ -55,7 +55,7 @@
 
 // these arrays are too small to compress
 extern const u32 EXP_MAXIMUMS[6];
-extern const int GENDER_THRESHOLDS[2][8];
+extern const u8 GENDER_THRESHOLDS[2][8];
 // the next arrays don't compress well at all. Not worth the decompression overhead.
 extern const byte gen_1_index_array[191];
 extern const u8 EVOLUTIONS[POKEMON_ARRAY_SIZE];
