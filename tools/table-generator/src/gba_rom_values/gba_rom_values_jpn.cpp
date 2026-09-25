@@ -2,7 +2,7 @@
 
 const struct ROM_DATA rom_data_values_jpn[] = {
     { // JPN_RUBY_v0
-        .is_valid = false,
+        .is_valid = true,
 
         .gamecode = RUBY_ID,
         .version = VERS_1_0,
@@ -63,7 +63,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .loc_gSaveBlock1PTR = 0 // TODO: Only used for old script, can be removed later
     },
     { // JPN_SAPPHIRE_v0
-        .is_valid = false,
+        .is_valid = true,
 
         .gamecode = SAPPHIRE_ID,
         .version = VERS_1_0,
@@ -124,7 +124,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .loc_gSaveBlock1PTR = 0 // TODO: Only used for old script, can be removed later
     },
     { // JPN_RUBY_v1
-        .is_valid = false,
+        .is_valid = true,
 
         .gamecode = RUBY_ID,
         .version = VERS_1_1,
@@ -185,7 +185,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .loc_gSaveBlock1PTR = 0 // TODO: Only used for old script, can be removed later
     },
     { // JPN_SAPPHIRE_v1
-        .is_valid = false,
+        .is_valid = true,
 
         .gamecode = SAPPHIRE_ID,
         .version = VERS_1_1,
@@ -246,7 +246,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .loc_gSaveBlock1PTR = 0 // TODO: Only used for old script, can be removed later
     },
     { // JPN_FIRERED_v0
-        .is_valid = false,
+        .is_valid = true,
 
         .gamecode = FIRERED_ID,
         .version = VERS_1_0,
@@ -308,7 +308,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .loc_gSaveBlock1PTR = 0x03005008, // TODO: Only used for old script, can be removed later
     },
     { // JPN_LEAFGREEN_v0
-        .is_valid = false,
+        .is_valid = true,
 
         .gamecode = LEAFGREEN_ID,
         .version = VERS_1_0,
@@ -370,7 +370,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .loc_gSaveBlock1PTR = 0x03005008, // TODO: Only used for old script, can be removed later
     },
     { // JPN_FIRERED_v1
-        .is_valid = false,
+        .is_valid = true,
 
         .gamecode = FIRERED_ID,
         .version = VERS_1_1,
@@ -432,7 +432,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .loc_gSaveBlock1PTR = 0x03005008, // TODO: Only used for old script, can be removed later
     },
     { // JPN_LEAFGREEN_v1
-        .is_valid = false,
+        .is_valid = true,
 
         .gamecode = LEAFGREEN_ID,
         .version = VERS_1_1,
@@ -494,7 +494,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .loc_gSaveBlock1PTR = 0x03005008, // TODO: Only used for old script, can be removed later
     },
     { // JPN_EMERALD_v0
-        .is_valid = false,
+        .is_valid = true,
 
         .gamecode = EMERALD_ID,
         .version = VERS_1_0,
