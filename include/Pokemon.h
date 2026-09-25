@@ -61,16 +61,10 @@ public:
 
 #if ON_GBA
 #else
-    virtual void print(std::ostream &os)
+    virtual void print(PokemonTables *pokeTable, std::ostream &os)
     {
         os << "This is a base Pokemon, it has no info!";
     };
-
-    friend std::ostream &operator<<(std::ostream &os, Pokemon &p)
-    {
-        p.print(os);
-        return os;
-    }
 #endif
 
     int dataArraySize;
@@ -88,8 +82,6 @@ public:
     bool isValid;
 
 protected:
-    PokemonTables *pokeTable;
-
     bool isBigEndian;
 
     u32 getVar(const DataVarInfo& dataVar);

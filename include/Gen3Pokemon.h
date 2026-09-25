@@ -9,7 +9,7 @@ class Gen3Pokemon : public Pokemon // The class for gen 3 Pokemon
 
 {
 public:
-    Gen3Pokemon(PokemonTables *table);
+    Gen3Pokemon();
     Gen3Pokemon(const Gen3Pokemon &other);
 
     bool convertToGen3(Gen3Pokemon *g3p);
@@ -182,7 +182,7 @@ protected:
 #if ON_GBA
 #else
 public:
-    void print(std::ostream &os);
+    void print(PokemonTables *pokeTable, std::ostream &os);
     std::string printDataArray(bool encrypedData);
 #endif
 
@@ -262,7 +262,7 @@ public:
     bool setOTLetter(int index, u32 newVal) { return setVar(*originalTrainerName[index], newVal); };
 
     bool setPersonalityValue(u32 newVal);
-    bool setAbility(u32 newVal);
+    bool setAbility(PokemonTables *pokeTable, u32 newVal);
 
     // This is used to load our data in from an array and decrypt it
     void loadData(const byte incomingArray[], bool areSubstructsShuffled = true);
@@ -280,7 +280,7 @@ public:
 
     byte getUnownLetter() override;
     Nature getNature();
-    Gender getGender();
+    Gender getGender(PokemonTables *pokeTable);
     int getAbilityFromPersonalityValue();
     int getSize();
 

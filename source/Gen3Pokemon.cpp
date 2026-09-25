@@ -20,9 +20,8 @@ static void determineSubstructOffsets(u32 substructLehmerCode, u8 *substructOffs
     }
 }
 
-Gen3Pokemon::Gen3Pokemon(PokemonTables *table)
+Gen3Pokemon::Gen3Pokemon()
 {
-    pokeTable = table;
     dataArrayPtr = dataArray;
     dataArraySize = 80;
     nicknameArrayPtr = &dataArray[0x8];
@@ -33,7 +32,7 @@ Gen3Pokemon::Gen3Pokemon(PokemonTables *table)
 };
 
 Gen3Pokemon::Gen3Pokemon(const Gen3Pokemon &other)
-    : Gen3Pokemon(other.pokeTable)
+    : Gen3Pokemon()
 {
     currSubstructureLehmerCode = other.currSubstructureLehmerCode;
     memcpy(substructOffsets, other.substructOffsets, sizeof(substructOffsets));
@@ -48,7 +47,7 @@ bool Gen3Pokemon::convertToGen3(Gen3Pokemon *g3p)
 // This is used to easily print out a Pokemon, when using a standard C++ terminal
 #if ON_GBA
 #else
-void Gen3Pokemon::print(std::ostream &os)
+void Gen3Pokemon::print(PokemonTables *pokeTable, std::ostream &os)
 {
     updateChecksum();
     updateSubstructureOrder(true);
@@ -64,7 +63,7 @@ void Gen3Pokemon::print(std::ostream &os)
             << "Personality Value: " << std::hex << getPersonalityValue() << std::dec
             << "\n\tLetter: " << (int)getUnownLetter()
             << "\n\tNature: " << getNature()
-            << "\n\tGender: " << getGender() << '\n'
+            << "\n\tGender: " << getGender(pokeTable) << '\n'
             << "Trainer ID: " << getTrainerID() << "\n"
             << "Secret ID: " << getSecretID() << "\n"
             << "Nickname: [";
@@ -205,7 +204,7 @@ bool Gen3Pokemon::setPersonalityValue(u32 newVal) // Setting the Personality Val
     return successful;
 }
 
-bool Gen3Pokemon::setAbility(u32 newVal) // We need to check if they have two abilities
+bool Gen3Pokemon::setAbility(PokemonTables *pokeTable, u32 newVal) // We need to check if they have two abilities
 {
     if (pokeTable->get_num_abilities(getSpeciesIndexNumber()) == 0)
     {
@@ -324,7 +323,7 @@ Nature Gen3Pokemon::getNature()
     return (Nature)(getPersonalityValue() % 25);
 };
 
-Gender Gen3Pokemon::getGender()
+Gender Gen3Pokemon::getGender(PokemonTables *pokeTable)
 {
     byte index = getSpeciesIndexNumber();
     u32 threshold = pokeTable->get_gender_threshold(index, true);

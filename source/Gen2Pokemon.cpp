@@ -1,8 +1,7 @@
 #include "Gen2Pokemon.h"
 
-Gen2Pokemon::Gen2Pokemon(Language nLang, PokemonTables *table, bool isPartyPkmn)
+Gen2Pokemon::Gen2Pokemon(Language nLang, bool isPartyPkmn)
 {
-    pokeTable = table;
     dataArrayPtr = dataArray;
     dataArraySize = isPartyPkmn ? 48 : 32;
     generation = 2;
@@ -21,9 +20,9 @@ Gen2Pokemon::Gen2Pokemon(Language nLang, PokemonTables *table, bool isPartyPkmn)
 
 #if ON_GBA
 #else
-void Gen2Pokemon::print(std::ostream &os)
+void Gen2Pokemon::print(PokemonTables *pokeTable, std::ostream &os)
 {
-    os << parentPrint()
+    os << parentPrint(pokeTable)
        << "Stats: "
        << "\n\tHP: " << getStatExp(HP) << " Stat EXP, " << getDV(HP) << " DVs"
        << "\n\tAttack: " << getStatExp(ATTACK) << " Stat EXP, " << getDV(ATTACK) << " DVs"
