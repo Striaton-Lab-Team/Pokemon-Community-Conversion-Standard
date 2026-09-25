@@ -41,7 +41,7 @@ void GBPokemon::loadData(Language nLang, const byte nDataArray[],
 // terminal
 #if ON_GBA
 #else
-std::string GBPokemon::parentPrint()
+std::string GBPokemon::parentPrint(PokemonTables *pokeTable)
 {
     pokeTable->load_input_charset(generation, ENGLISH);
     std::stringstream os;
@@ -150,7 +150,7 @@ UnownLetter GBPokemon::getUnownLetter()
     return NO_LETTER;
 }
 
-Gender GBPokemon::getGender()
+Gender GBPokemon::getGender(PokemonTables *pokeTable)
 {
     byte index = getSpeciesIndexNumber();
     u32 threshold = pokeTable->get_gender_threshold(index, false);
@@ -180,7 +180,7 @@ bool GBPokemon::getIsShiny()
            getDV(SPEED) == 10 && getDV(SPECIAL) == 10;
 }
 
-bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, bool sanitizeMythicals)
+bool GBPokemon::convertToGen3(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method, bool sanitizeMythicals)
 {
     if (!isValid)
     {
@@ -190,18 +190,18 @@ bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, boo
     bool valid =
         // Start with things that effect the PID
         convertSpeciesIndexNumber(newPkmn) && setRequestedLetter(newPkmn) &&
-        setRequestedNature(newPkmn, method) && setRequestedGender(newPkmn) &&
+        setRequestedNature(newPkmn, method) && setRequestedGender(pokeTable, newPkmn) &&
         setRequestedAbility(newPkmn, method) && setRequestedSize(newPkmn, method) &&
 
         // Then set the PID and IVs
-        generatePersonalityValueAndIVs(newPkmn, method, false) &&
+        generatePersonalityValueAndIVs(pokeTable, newPkmn, method, false) &&
 
         // Then set everything else
-        convertTrainerID(newPkmn) && convertNickname(newPkmn) &&
+        convertTrainerID(newPkmn) && convertNickname(pokeTable, newPkmn) &&
         convertLanguage(newPkmn) && convertMiscFlags(newPkmn) &&
-        convertTrainerNickname(newPkmn) && convertMarkings(newPkmn) &&
-        convertItem(newPkmn) && convertEXP(newPkmn, method) &&
-        convertFriendship(newPkmn) && convertMoves(newPkmn, method) &&
+        convertTrainerNickname(pokeTable, newPkmn) && convertMarkings(newPkmn) &&
+        convertItem(newPkmn) && convertEXP(pokeTable, newPkmn, method) &&
+        convertFriendship(newPkmn) && convertMoves(pokeTable, newPkmn, method) &&
         convertEVs(newPkmn, method) && convertContestConditions(newPkmn) &&
         convertPokerus(newPkmn, method) && convertMetLocation(newPkmn, method) &&
         convertMetLevel(newPkmn, method) && convertGameOfOrigin(newPkmn, method) &&
@@ -228,7 +228,7 @@ bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, boo
         if (sanitizeMythicals)
         {
             // Modify the required data for the event
-            valid &= loadEvent(newPkmn, method);
+            valid &= loadEvent(pokeTable, newPkmn, method);
         }
     }
 
@@ -236,9 +236,9 @@ bool GBPokemon::convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, boo
     return valid;
 };
 
-bool GBPokemon::loadEvent(Gen3Pokemon *newPkmn, ConversionMethod method)
+bool GBPokemon::loadEvent(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method)
 {
-    bool valid = generatePersonalityValueAndIVs(newPkmn, method, true) &&
+    bool valid = generatePersonalityValueAndIVs(pokeTable, newPkmn, method, true) &&
                  convertEVs(newPkmn, method);
     if (!valid)
     {
@@ -346,7 +346,7 @@ void GBPokemon::updateValidity()
     );
 };
 
-bool GBPokemon::externalConvertNickname(byte outputArray[])
+bool GBPokemon::externalConvertNickname(PokemonTables *pokeTable, byte outputArray[])
 {
 
     pokeTable->load_input_charset(generation, getLanguage());
@@ -377,7 +377,7 @@ u32 GBPokemon::getIndividualDataChecksum()
     return out;
 }
 
-bool GBPokemon::generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionMethod method, bool isEvent)
+bool GBPokemon::generatePersonalityValueAndIVs(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method, bool isEvent)
 {
     switch(method)
     {
@@ -621,7 +621,7 @@ bool GBPokemon::generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionM
                 newPkmn->getAbilityFromPersonalityValue() == newPkmn->internalAbility &&
                 newPkmn->getUnownLetter() == newPkmn->internalUnownLetter &&
                 newPkmn->getNature() == newPkmn->internalNature &&
-                newPkmn->getGender() == newPkmn->internalGender &&
+                newPkmn->getGender(pokeTable) == newPkmn->internalGender &&
                 newPkmn->getSize() == newPkmn->internalSize)
             );
 
@@ -645,7 +645,7 @@ bool GBPokemon::convertTrainerID(Gen3Pokemon *newPkmn)
     return true;
 }
 
-bool GBPokemon::convertNickname(Gen3Pokemon *newPkmn)
+bool GBPokemon::convertNickname(PokemonTables *pokeTable, Gen3Pokemon *newPkmn)
 {
     pokeTable->load_input_charset(generation, getLanguage());
     pokeTable->load_gen3_charset(getLanguage());
@@ -682,7 +682,7 @@ bool GBPokemon::convertMiscFlags(Gen3Pokemon *newPkmn)
     return true;
 }
 
-bool GBPokemon::convertTrainerNickname(Gen3Pokemon *newPkmn)
+bool GBPokemon::convertTrainerNickname(PokemonTables *pokeTable, Gen3Pokemon *newPkmn)
 {
 
     pokeTable->load_input_charset(generation, getLanguage());
@@ -747,7 +747,7 @@ bool GBPokemon::convertItem(Gen3Pokemon *newPkmn)
     return true;
 }
 
-bool GBPokemon::convertEXP(Gen3Pokemon *newPkmn, ConversionMethod method)
+bool GBPokemon::convertEXP(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method)
 {
     // As per Poke Transporter, the level will be based on the level value, not
     // the EXP 
@@ -816,7 +816,7 @@ bool GBPokemon::convertFriendship(Gen3Pokemon *newPkmn)
     return true;
 }
 
-bool GBPokemon::convertMoves(Gen3Pokemon *newPkmn, ConversionMethod method)
+bool GBPokemon::convertMoves(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method)
 {
 
     switch(method)
@@ -1271,9 +1271,9 @@ bool GBPokemon::convertTrainerGender(Gen3Pokemon *newPkmn, ConversionMethod meth
     }
 };
 
-bool GBPokemon::convertAbilityFlag(Gen3Pokemon *newPkmn)
+bool GBPokemon::convertAbilityFlag(PokemonTables *pokeTable, Gen3Pokemon *newPkmn)
 {
-    u32 pid = newPkmn->getPersonalityValue();
+    u32 pid = pokeTable, newPkmn->getPersonalityValue();
     newPkmn->setAbility(pid & 0b1);
     return true;
 }
@@ -1313,9 +1313,9 @@ bool GBPokemon::setRequestedNature(Gen3Pokemon *newPkmn, ConversionMethod method
     }
 };
 
-bool GBPokemon::setRequestedGender(Gen3Pokemon *newPkmn)
+bool GBPokemon::setRequestedGender(PokemonTables *pokeTable, Gen3Pokemon *newPkmn)
 {
-    newPkmn->internalGender = getGender();
+    newPkmn->internalGender = getGender(pokeTable);
     return true;
 };
 

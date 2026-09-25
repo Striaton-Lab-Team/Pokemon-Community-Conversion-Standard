@@ -6,7 +6,7 @@
 class Gen1Pokemon : public GBPokemon // The class for gen 1 Pokemon
 {
 public:
-    Gen1Pokemon(Language nLang, PokemonTables *table);
+    Gen1Pokemon(Language nLang);
     byte dataArray[33];
 
     /**
@@ -42,7 +42,7 @@ protected:
 
 #if ON_GBA
 #else
-    void print(std::ostream &os);
+    void print(PokemonTables *pokeTable, std::ostream &os);
 #endif
 };
 

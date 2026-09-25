@@ -7,16 +7,13 @@
 #include "ptgb_save_data_manager.h"
 #endif
 
-PokeBox::PokeBox(PokemonTables *nTable)
-    : table(nTable)
-    , boxStorage()
+PokeBox::PokeBox()
+    : boxStorage()
     , nullMon(new Pokemon())
     , currIndex(0)
     , stabilize_mythical(false)
 {
 }
-
-void PokeBox::setTable(PokemonTables *nTable) { table = nTable; }
 
 bool PokeBox::addPokemon(Pokemon *currPkmn)
 {
@@ -85,11 +82,11 @@ void PokeBox::loadData(int generation, Language nLang, const byte nDataArray[])
         GBPokemon *newPkmn = nullptr;
         if (generation == 1)
         {
-            newPkmn = new Gen1Pokemon(nLang, table);
+            newPkmn = new Gen1Pokemon(nLang);
         }
         else if (generation == 2)
         {
-            newPkmn = new Gen2Pokemon(nLang, table);
+            newPkmn = new Gen2Pokemon(nLang);
         }
 
         int maxPkmn = (nLang == JAPANESE) ? 30 : 20;
@@ -114,13 +111,13 @@ void PokeBox::loadData(int generation, Language nLang, const byte nDataArray[])
     }
 }
 
-void PokeBox::convertPkmn(int index)
+void PokeBox::convertPkmn(PokemonTables *table, int index)
 {
-    Gen3Pokemon *convertedPkmn = new Gen3Pokemon(table);
+    Gen3Pokemon *convertedPkmn = new Gen3Pokemon();
     Pokemon *basePkmn = getPokemon(index);
     GBPokemon *oldPkmn = (GBPokemon *)(basePkmn);
 
-    oldPkmn->convertToGen3(convertedPkmn, LEGAL, stabilize_mythical);
+    oldPkmn->convertToGen3(table, convertedPkmn, LEGAL, stabilize_mythical);
 
     // Set the initial checksum so that isEncrypted() correctly returns false
     // for this freshly converted, unencrypted Pokemon.
@@ -130,11 +127,11 @@ void PokeBox::convertPkmn(int index)
     boxStorage[index] = convertedPkmn;
 }
 
-void PokeBox::convertAll()
+void PokeBox::convertAll(PokemonTables *table)
 {
     for (int i = 0; i < currIndex; i++)
     {
-        convertPkmn(i);
+        convertPkmn(table, i);
     }
 }
 
@@ -211,4 +208,16 @@ std::string PokeBox::printDataArray()
     }
     return ss.str();
 }
+
+void PokeBox::print(PokemonTables *pokeTable, std::ostream &os)
+{
+    for (int i = 0; i < currIndex; i++)
+    {
+        os << "\n"
+           << "---------------- " << "POKEMON #" << i << " ----------------" << "\n";
+        boxStorage[i]->print(pokeTable, os);
+        os << "\n";
+    }
+}
+
 #endif

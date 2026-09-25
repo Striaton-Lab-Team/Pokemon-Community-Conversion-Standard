@@ -38,7 +38,7 @@ protected:
 // This is used to easily print out a Pokemon, when using a standard C++ terminal
 #if ON_GBA
 #else
-    std::string parentPrint();
+    std::string parentPrint(PokemonTables *pokeTable);
 #endif
 
 public:
@@ -107,29 +107,29 @@ public:
     // These aren't direct variables, but they're useful to have
     Language getLanguage() { return lang; };
     UnownLetter getUnownLetter() override;
-    Gender getGender();
+    Gender getGender(PokemonTables *pokeTable);
     Nature getVirtualConsoleNature();
     bool getIsShiny() override;
-    bool externalConvertNickname(byte outputArray[]);
+    bool externalConvertNickname(PokemonTables *pokeTable, byte outputArray[]);
     u32 getIndividualDataChecksum();
     
     // And this is for all the conversion stuff
-    bool convertToGen3(Gen3Pokemon *newPkmn, ConversionMethod method, bool sanitizeMythicals=true);
-    bool loadEvent(Gen3Pokemon *newPkmn, ConversionMethod method);
+    bool convertToGen3(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method, bool sanitizeMythicals=true);
+    bool loadEvent(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method);
 
-    bool generatePersonalityValueAndIVs(Gen3Pokemon *newPkmn, ConversionMethod method, bool isEvent);
+    bool generatePersonalityValueAndIVs(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method, bool isEvent);
     bool convertTrainerID(Gen3Pokemon *newPkmn);
-    bool convertNickname(Gen3Pokemon *newPkmn);
+    bool convertNickname(PokemonTables *pokeTable, Gen3Pokemon *newPkmn);
     bool convertLanguage(Gen3Pokemon *newPkmn);
     bool convertMiscFlags(Gen3Pokemon *newPkmn);
-    bool convertTrainerNickname(Gen3Pokemon *newPkmn);
+    bool convertTrainerNickname(PokemonTables *pokeTable, Gen3Pokemon *newPkmn);
     bool convertMarkings(Gen3Pokemon *newPkmn);
     // Data
     bool convertSpeciesIndexNumber(Gen3Pokemon *newPkmn);
     bool convertItem(Gen3Pokemon *newPkmn);
-    bool convertEXP(Gen3Pokemon *newPkmn, ConversionMethod method);
+    bool convertEXP(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertFriendship(Gen3Pokemon *newPkmn);
-    bool convertMoves(Gen3Pokemon *newPkmn, ConversionMethod method);
+    bool convertMoves(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertEVs(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertContestConditions(Gen3Pokemon *newPkmn);
     bool convertPokerus(Gen3Pokemon *newPkmn, ConversionMethod method);
@@ -138,13 +138,13 @@ public:
     bool convertGameOfOrigin(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertPokeball(Gen3Pokemon *newPkmn);
     bool convertTrainerGender(Gen3Pokemon *newPkmn, ConversionMethod method);
-    bool convertAbilityFlag(Gen3Pokemon *newPkmn);
+    bool convertAbilityFlag(PokemonTables *pokeTable, Gen3Pokemon *newPkmn);
     bool convertRibbonsAndObedience(Gen3Pokemon *newPkmn);
     bool convertShininess(Gen3Pokemon *newPkmn);
     // Extra
     bool setRequestedLetter(Gen3Pokemon *newPkmn);
     bool setRequestedNature(Gen3Pokemon *newPkmn, ConversionMethod method);
-    bool setRequestedGender(Gen3Pokemon *newPkmn);
+    bool setRequestedGender(PokemonTables *pokeTable, Gen3Pokemon *newPkmn);
     bool setRequestedAbility(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool setRequestedSize(Gen3Pokemon *newPkmn, ConversionMethod method);
 };
