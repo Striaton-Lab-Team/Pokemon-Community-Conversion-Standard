@@ -14,10 +14,10 @@ TEST_CASE("Full Unown test - make sure every DV set is valid", "[unit][gen1][pok
     const byte cyndaquil_ot[] = {0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x8A, 0x50}; // ABCDEFGHIJ
     static const byte cyndaquil_id = 0x9B;
 
-    Gen2Pokemon unown(ENGLISH, &table);
+    Gen2Pokemon unown(ENGLISH);
     unown.loadData(ENGLISH, cyndaquil_data, cyndaquil_name, cyndaquil_ot, cyndaquil_id);
 
-    Gen3Pokemon converted(&table);
+    Gen3Pokemon converted;
     unown.setSpeciesIndexNumber(201);
 
     for (int dvs = 0; dvs < (1 << 16); dvs++)
@@ -27,7 +27,7 @@ TEST_CASE("Full Unown test - make sure every DV set is valid", "[unit][gen1][pok
             unown.setDV((Stat)(i + 1), (dvs >> (4 * i)) & 0b1111);
         }
         INFO("Unown conversion failed on DV combination: " << dvs);
-        CHECK(unown.convertToGen3(&converted, LEGAL));
+        CHECK(unown.convertToGen3(&table, &converted, LEGAL));
     }
 }
 
@@ -63,10 +63,10 @@ TEST_CASE("Full Gender test - make sure every DV set is valid for genders", "[un
 
     for (int index = 0; index < NUM_GENDER_TESTS; index++)
     {
-        Gen2Pokemon mon(ENGLISH, &table);
+        Gen2Pokemon mon(ENGLISH);
         mon.loadData(ENGLISH, cyndaquil_data, cyndaquil_name, cyndaquil_ot, cyndaquil_id);
 
-        Gen3Pokemon converted(&table);
+        Gen3Pokemon converted;
         mon.setSpeciesIndexNumber(ids_for_genders[index]);
 
         for (int dvs = 0; dvs < (1 << 16); dvs++)
@@ -76,7 +76,7 @@ TEST_CASE("Full Gender test - make sure every DV set is valid for genders", "[un
                 mon.setDV((Stat)(i + 1), (dvs >> (4 * i)) & 0b1111);
             }
             INFO("Gender conversion failed on DV and Pokemon Index combination: " << dvs << "/" << index);
-            CHECK(mon.convertToGen3(&converted, LEGAL));
+            CHECK(mon.convertToGen3(&table, &converted, LEGAL));
         }
     }
 }

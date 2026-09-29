@@ -38,7 +38,7 @@ TEST_CASE("Basic gen 1 test - check that pokemon data is parsed correctly", "[un
 {
     PokemonTables table;
 
-    Gen1Pokemon charmander(ENGLISH, &table);
+    Gen1Pokemon charmander(ENGLISH);
     charmander.loadData(ENGLISH, charmander_data, charmander_name, charmander_ot, charmander_id);
 
     REQUIRE(charmander.getRawSpeciesIndexNumber() == 0xB0);
@@ -51,7 +51,7 @@ TEST_CASE("Basic gen 2 test - check that pokemon data is parsed correctly", "[un
 {
     PokemonTables table;
 
-    Gen2Pokemon cyndaquil(ENGLISH, &table);
+    Gen2Pokemon cyndaquil(ENGLISH);
     cyndaquil.loadData(ENGLISH, cyndaquil_data, cyndaquil_name, cyndaquil_ot, cyndaquil_id);
 
     REQUIRE(cyndaquil.getSpeciesIndexNumber() == 0x9B);
@@ -66,11 +66,11 @@ TEST_CASE("Basic gen2-gen3 conversion test", "[unit][gen2][gen3][conversion]")
 {
     PokemonTables table;
 
-    Gen2Pokemon cyndaquil(ENGLISH, &table);
+    Gen2Pokemon cyndaquil(ENGLISH);
     cyndaquil.loadData(ENGLISH, cyndaquil_data, cyndaquil_name, cyndaquil_ot, cyndaquil_id);
 
-    Gen3Pokemon convertedCyndaquil(&table);
-    REQUIRE(cyndaquil.convertToGen3(&convertedCyndaquil, LEGAL, true) == true);
+    Gen3Pokemon convertedCyndaquil;
+    REQUIRE(cyndaquil.convertToGen3(&table, &convertedCyndaquil, LEGAL, true) == true);
 
     REQUIRE(convertedCyndaquil.getTrainerID() == 7465);
     REQUIRE(convertedCyndaquil.getSecretID() == 0);
@@ -133,7 +133,7 @@ TEST_CASE("Basic gen 3 test - check that pokemon data is parsed correctly", "[un
     PokemonTables table;
     table.load_gen3_charset(ENGLISH);
 
-    Gen3Pokemon bulbasaur(&table);
+    Gen3Pokemon bulbasaur;
     // PK3 files have a fixed GAEM substructure order.
     bulbasaur.loadData(g3_bulbasaur_data, false);
 
@@ -198,7 +198,7 @@ TEST_CASE("Basic gen 3 test - decryption", "[unit][gen3][pokemonparsing][decrypt
     PokemonTables table;
     table.load_gen3_charset(ENGLISH);
 
-    Gen3Pokemon lapras(&table);
+    Gen3Pokemon lapras;
     lapras.loadData(g3_lapras_data_encrypted);
     lapras.decryptSubstructures();
 
@@ -264,7 +264,7 @@ TEST_CASE("Basic gen 3 test - check checksum calculation", "[unit][gen3][checksu
     PokemonTables table;
     table.load_gen3_charset(ENGLISH);
 
-    Gen3Pokemon bulbasaur(&table);
+    Gen3Pokemon bulbasaur;
     // PK3 files have a fixed GAEM substructure order.
     bulbasaur.loadData(g3_bulbasaur_data, false);
 

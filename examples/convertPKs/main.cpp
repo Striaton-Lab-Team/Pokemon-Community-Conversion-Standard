@@ -12,10 +12,10 @@
 #include "Gen3Pokemon.h"
 
 
-std::string inputBox = "inBox-gen1";
+std::string inputBox = "inBox";
 std::string outputBox = "outBox";
-int generation = 1;
-Language language = FRENCH;
+int generation = 2;
+Language language = KOREAN;
 ConversionMethod method = LEGAL;
 
 bool printPokemon = false;
@@ -65,12 +65,12 @@ int convert(std::string inputPath, std::string outputPath)
     std::unique_ptr<GBPokemon> source;
     if (generation == 1)
     {
-        source = std::make_unique<Gen1Pokemon>(language, &table);
+        source = std::make_unique<Gen1Pokemon>(language);
     }
     else
     {
         // PCCS conversion only needs the 32-byte boxed portion.
-        source = std::make_unique<Gen2Pokemon>(language, &table);
+        source = std::make_unique<Gen2Pokemon>(language);
     }
 
     source->loadData(language,
@@ -79,8 +79,8 @@ int convert(std::string inputPath, std::string outputPath)
         fileData.data() + trainerNameOffset,
         fileData[pokemonDataOffset]);
 
-    Gen3Pokemon converted(&table);
-    if (!source->convertToGen3(&converted, method, sanitizeMythicals))
+    Gen3Pokemon converted;
+    if (!source->convertToGen3(&table, &converted, method, sanitizeMythicals))
     {
         std::cerr << "PCCS could not convert the Pokemon (" << inputPath << ")\n";
         return 1;
@@ -88,7 +88,8 @@ int convert(std::string inputPath, std::string outputPath)
 
     if (printPokemon)
     {
-        std::cout << converted << '\n';
+        converted.print(&table, std::cout);
+        std::cout << '\n';
     }
 
     converted.setChecksum(converted.calculateChecksum());

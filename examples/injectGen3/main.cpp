@@ -57,7 +57,7 @@ int main(int argc, char **argv)
     Gen3SaveFileReader saveFileReader(savFile);
     const Game game = PCCSUtils::determineGameType(argv[2]);
     Gen3SaveManager saveManager(game, LANGUAGE_UNKNOWN, saveFileReader);
-    Gen3Pokemon pokemon(&table);
+    Gen3Pokemon pokemon;
 
     pokemon.loadData(pk3Buffer, false);
 
