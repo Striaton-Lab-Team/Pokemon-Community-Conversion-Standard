@@ -7,6 +7,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .gamecode = RUBY_ID,
         .version = VERS_1_0,
         .language = LANG_JPN,
+        .entrypoint = 0xEA000032,
 
         .loc_copyMonToPC = 0x803ad14, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x808d884,
@@ -67,6 +68,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .gamecode = SAPPHIRE_ID,
         .version = VERS_1_0,
         .language = LANG_JPN,
+        .entrypoint = 0xEA000032,
 
         .loc_copyMonToPC = 0x803ad14, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x808d884,
@@ -127,6 +129,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .gamecode = RUBY_ID,
         .version = VERS_1_1,
         .language = LANG_JPN,
+        .entrypoint = 0xEA000032,
 
         .loc_copyMonToPC = 0x803ad14, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x808d884,
@@ -187,6 +190,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .gamecode = SAPPHIRE_ID,
         .version = VERS_1_1,
         .language = LANG_JPN,
+        .entrypoint = 0xEA000032,
 
         .loc_copyMonToPC = 0x803ad14, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x808d884,
@@ -247,6 +251,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .gamecode = FIRERED_ID,
         .version = VERS_1_0,
         .language = LANG_JPN,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x8040284, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x8088a50,
@@ -308,6 +313,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .gamecode = LEAFGREEN_ID,
         .version = VERS_1_0,
         .language = LANG_JPN,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x8040284,
         .loc_getSetPokedexFlag = 0x8088a24,
@@ -369,6 +375,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .gamecode = FIRERED_ID,
         .version = VERS_1_1,
         .language = LANG_JPN,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x80401f0,
         .loc_getSetPokedexFlag = 0x80889e0,
@@ -430,6 +437,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .gamecode = LEAFGREEN_ID,
         .version = VERS_1_1,
         .language = LANG_JPN,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x80401f0,
         .loc_getSetPokedexFlag = 0x80889b4,
@@ -491,6 +499,7 @@ const struct ROM_DATA rom_data_values_jpn[] = {
         .gamecode = EMERALD_ID,
         .version = VERS_1_0,
         .language = LANG_JPN,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x806af58,
         .loc_getSetPokedexFlag = 0x80bfbbc,

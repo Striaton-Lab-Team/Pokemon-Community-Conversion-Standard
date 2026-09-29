@@ -8,6 +8,7 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .gamecode = RUBY_ID,
         .version = VERS_1_0,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x803db6c, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x809127c,
@@ -69,6 +70,7 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .gamecode = SAPPHIRE_ID,
         .version = VERS_1_0,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x803db6c, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x809127c,
@@ -130,6 +132,7 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .gamecode = RUBY_ID,
         .version = VERS_1_1,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x803db6c, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x809127c,
@@ -191,6 +194,7 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .gamecode = SAPPHIRE_ID,
         .version = VERS_1_1,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x803db6c, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x809127c,
@@ -252,6 +256,7 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .gamecode = FIRERED_ID,
         .version = VERS_1_0,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x8040a68, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x8089018,
@@ -314,6 +319,7 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .gamecode = LEAFGREEN_ID,
         .version = VERS_1_0,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x8040a68,
         .loc_getSetPokedexFlag = 0x8088fec,
@@ -376,6 +382,7 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .gamecode = EMERALD_ID,
         .version = VERS_1_0,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x806b490,
         .loc_getSetPokedexFlag = 0x80c0448,
