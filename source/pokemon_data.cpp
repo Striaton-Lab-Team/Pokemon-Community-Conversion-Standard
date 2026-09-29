@@ -6,6 +6,7 @@
 #include "EXP_GROUPS_lz10_bin.h"
 #include "FIRST_MOVES_lz10_bin.h"
 #include "GENDER_RATIO_lz10_bin.h"
+#include "JPN_NAMES_lz10_bin.h"
 #include "NUM_ABILITIES_lz10_bin.h"
 #include "POWER_POINTS_lz10_bin.h"
 #include "TYPES_lz10_bin.h"
@@ -18,6 +19,7 @@
 #include "EXP_GROUPS_bin.h"
 #include "FIRST_MOVES_bin.h"
 #include "GENDER_RATIO_bin.h"
+#include "JPN_NAMES_bin.h"
 #include "NUM_ABILITIES_bin.h"
 #include "POWER_POINTS_bin.h"
 #include "TYPES_bin.h"
@@ -1815,6 +1817,16 @@ void PokemonTables::load_gender_ratios()
 #endif
 }
 
+void PokemonTables::load_jpn_names()
+{
+#if ON_GBA
+    load_table((uint8_t *)JPN_NAMES, JPN_NAMES_lz10_bin, jpn_names_loaded);
+#else
+    load_table((uint8_t *)JPN_NAMES, JPN_NAMES_bin, JPN_NAMES_bin_size,
+        jpn_names_loaded);
+#endif
+}
+
 void PokemonTables::load_num_abilities()
 {
 #if ON_GBA
@@ -1910,6 +1922,16 @@ u8 PokemonTables::get_gender_threshold(int index_num, bool is_gen_3)
 {
     load_gender_ratios();
     return GENDER_THRESHOLDS[is_gen_3][GENDER_RATIO[index_num]];
+}
+
+bool PokemonTables::get_japanese_name(int index_num, u16 out[])
+{
+    load_jpn_names();
+    for(int i = 0; i < 6; i++)
+    {
+        out[i] = JPN_NAMES[index_num][i];
+    }
+    return true;
 }
 
 // If the Pokemon has two abilities it returns a 1, since ability 1 is valid.

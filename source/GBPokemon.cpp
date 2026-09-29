@@ -647,21 +647,38 @@ bool GBPokemon::convertTrainerID(Gen3Pokemon *newPkmn)
 
 bool GBPokemon::convertNickname(PokemonTables *pokeTable, Gen3Pokemon *newPkmn)
 {
-    pokeTable->load_input_charset(generation, getLanguage());
-    pokeTable->load_gen3_charset(getLanguage());
-    bool hitTerminator = false;
-    byte currLetter;
-    for (int i = 0; i < 10; i++)
+    if (getLanguage() == KOREAN)
     {
-        if (hitTerminator)
+        pokeTable->load_jpn_names();
+        u16 jpn_name[6];
+        byte out_name[6];
+        pokeTable->get_japanese_name(getSpeciesIndexNumber(), jpn_name);
+        pokeTable->load_input_charset(generation, JAPANESE);
+        pokeTable->load_gen3_charset(getLanguage());
+        for (int i = 0; i < 6; i++)
         {
-            newPkmn->setNicknameLetter(i, 0xFF);
+            out_name[i] = pokeTable->get_gen_3_char(jpn_name[i]);
         }
-        else
+        newPkmn->setNicknameArray(out_name, 6);
+    }
+    else
+    {
+        pokeTable->load_input_charset(generation, getLanguage());
+        pokeTable->load_gen3_charset(getLanguage());
+        bool hitTerminator = false;
+        byte currLetter;
+        for (int i = 0; i < 10; i++)
         {
-            currLetter = pokeTable->get_gen_3_char(pokeTable->input_charset[nicknameArray[i]]);
-            newPkmn->setNicknameLetter(i, currLetter);
-            hitTerminator = currLetter == 0xFF;
+            if (hitTerminator)
+            {
+                newPkmn->setNicknameLetter(i, 0xFF);
+            }
+            else
+            {
+                currLetter = pokeTable->get_gen_3_char(pokeTable->input_charset[nicknameArray[i]]);
+                newPkmn->setNicknameLetter(i, currLetter);
+                hitTerminator = currLetter == 0xFF;
+            }
         }
     }
     return true;
@@ -669,7 +686,14 @@ bool GBPokemon::convertNickname(PokemonTables *pokeTable, Gen3Pokemon *newPkmn)
 
 bool GBPokemon::convertLanguage(Gen3Pokemon *newPkmn)
 {
-    newPkmn->setLanguage(getLanguage());
+    if (getLanguage() == KOREAN)
+    {
+        newPkmn->setLanguage(JAPANESE);
+    }
+    else
+    {
+        newPkmn->setLanguage(getLanguage());
+    }
     return true;
 }
 
@@ -685,22 +709,30 @@ bool GBPokemon::convertMiscFlags(Gen3Pokemon *newPkmn)
 bool GBPokemon::convertTrainerNickname(PokemonTables *pokeTable, Gen3Pokemon *newPkmn)
 {
 
-    pokeTable->load_input_charset(generation, getLanguage());
-    pokeTable->load_gen3_charset(getLanguage());
-    bool hitTerminator = false;
-    byte currLetter;
-    
-    for (int i = 0; i < 7; i++)
+    if (getLanguage() == KOREAN)
     {
-        if (hitTerminator)
+        byte new_name[7] = {0x8B, 0xAE, 0x79, 0x95, 0xFF, 0x00, 0x00}; // ゴールド Gold, name of the player character in Gold/Silver
+        newPkmn->setOTArray(new_name, 7);
+    }
+    else
+    {
+        pokeTable->load_input_charset(generation, getLanguage());
+        pokeTable->load_gen3_charset(getLanguage());
+        bool hitTerminator = false;
+        byte currLetter;
+        
+        for (int i = 0; i < 7; i++)
         {
-            newPkmn->setOTLetter(i, 0xFF);
-        }
-        else
-        {
-            currLetter = pokeTable->get_gen_3_char(pokeTable->input_charset[OTArray[i]]);
-            newPkmn->setOTLetter(i, currLetter);
-            hitTerminator = currLetter == 0xFF;
+            if (hitTerminator)
+            {
+                newPkmn->setOTLetter(i, 0xFF);
+            }
+            else
+            {
+                currLetter = pokeTable->get_gen_3_char(pokeTable->input_charset[OTArray[i]]);
+                newPkmn->setOTLetter(i, currLetter);
+                hitTerminator = currLetter == 0xFF;
+            }
         }
     }
     return true;
