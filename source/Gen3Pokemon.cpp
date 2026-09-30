@@ -20,9 +20,8 @@ static void determineSubstructOffsets(u32 substructLehmerCode, u8 *substructOffs
     }
 }
 
-Gen3Pokemon::Gen3Pokemon(PokemonTables *table)
+Gen3Pokemon::Gen3Pokemon()
 {
-    pokeTable = table;
     dataArrayPtr = dataArray;
     dataArraySize = 80;
     nicknameArrayPtr = &dataArray[0x8];
@@ -33,7 +32,7 @@ Gen3Pokemon::Gen3Pokemon(PokemonTables *table)
 };
 
 Gen3Pokemon::Gen3Pokemon(const Gen3Pokemon &other)
-    : Gen3Pokemon(other.pokeTable)
+    : Gen3Pokemon()
 {
     currSubstructureLehmerCode = other.currSubstructureLehmerCode;
     memcpy(substructOffsets, other.substructOffsets, sizeof(substructOffsets));
@@ -48,7 +47,7 @@ bool Gen3Pokemon::convertToGen3(Gen3Pokemon *g3p)
 // This is used to easily print out a Pokemon, when using a standard C++ terminal
 #if ON_GBA
 #else
-void Gen3Pokemon::print(std::ostream &os)
+void Gen3Pokemon::print(PokemonTables *pokeTable, std::ostream &os)
 {
     updateChecksum();
     updateSubstructureOrder(true);
@@ -64,7 +63,7 @@ void Gen3Pokemon::print(std::ostream &os)
             << "Personality Value: " << std::hex << getPersonalityValue() << std::dec
             << "\n\tLetter: " << (int)getUnownLetter()
             << "\n\tNature: " << getNature()
-            << "\n\tGender: " << getGender() << '\n'
+            << "\n\tGender: " << getGender(pokeTable) << '\n'
             << "Trainer ID: " << getTrainerID() << "\n"
             << "Secret ID: " << getSecretID() << "\n"
             << "Nickname: [";
@@ -159,12 +158,37 @@ std::string Gen3Pokemon::printDataArray(bool encryptedData)
     {
         encryptSubstructures();
     }
+    else
+    {
+        decryptSubstructures();
+    }
     std::stringstream ss;
     for (int i = 0; i < 80; i++)
     {
         ss << std::hex << std::setw(2) << std::setfill('0') << (int)dataArray[i] << (i < 79 ? " " : "");
     }
     return ss.str();
+}
+std::array<byte, 80> Gen3Pokemon::outputByteArray(bool encryptedData, bool standardizeSubstruct)
+{
+    updateSubstructureOrder(true);
+    updateChecksum();
+    if(encryptedData)
+    {
+        encryptSubstructures();
+    }
+    else
+    {
+        decryptSubstructures();
+    }
+    
+    if(standardizeSubstruct)
+    {
+        resetSubstructureOrder();
+    }
+    std::array<byte, 80> output{};
+    std::memcpy(output.data(), dataArray, output.size());
+    return output;
 }
 #endif
 
@@ -205,7 +229,7 @@ bool Gen3Pokemon::setPersonalityValue(u32 newVal) // Setting the Personality Val
     return successful;
 }
 
-bool Gen3Pokemon::setAbility(u32 newVal) // We need to check if they have two abilities
+bool Gen3Pokemon::setAbility(PokemonTables *pokeTable, u32 newVal) // We need to check if they have two abilities
 {
     if (pokeTable->get_num_abilities(getSpeciesIndexNumber()) == 0)
     {
@@ -293,6 +317,32 @@ void Gen3Pokemon::updateSubstructureOrder(bool shouldMove)
     memcpy(substructOffsets, newSubstructOffsets, sizeof(newSubstructOffsets));
 }
 
+void Gen3Pokemon::resetSubstructureOrder()
+{
+    u8 newSubstructOffsets[4] = {0, 1, 2, 3};
+
+    u8 tempBuffer[48];
+    uintptr_t oldOffset;
+    uintptr_t newOffset;
+    u8 *dataSectionStartPtr = dataArrayPtr + GEN3_PKMN_DATA_SUBSTRUCT_OFFSET;
+    u32 i;
+
+    // first we copy the old data sections into a temporary buffer, since they might get overwritten during the move process.
+    memcpy(tempBuffer, dataSectionStartPtr, 48);
+
+    // now we copy the data from the temporary buffer to the correct new locations in the data array, based on the new substructure offsets.
+    // for each of the substructures (G, A, E, M), we find where it is currently located in the data array using substructOffsets, and then 
+    // we copy it to its new location based on newSubstructOffsets.
+    for(i=0; i < 4; ++i)
+    {
+        oldOffset = substructOffsets[i] * GEN3_POKEMON_SUBSTRUCTURE_SIZE;
+        newOffset = newSubstructOffsets[i] * GEN3_POKEMON_SUBSTRUCTURE_SIZE;
+        memcpy(dataSectionStartPtr + newOffset, tempBuffer + oldOffset, GEN3_POKEMON_SUBSTRUCTURE_SIZE);
+    }
+    
+    memcpy(substructOffsets, newSubstructOffsets, sizeof(newSubstructOffsets));
+}
+
 void Gen3Pokemon::updateSecurityData()
 {
     updateSubstructureOrder(true);
@@ -300,31 +350,42 @@ void Gen3Pokemon::updateSecurityData()
     encryptSubstructures();
 }
 
-byte Gen3Pokemon::getUnownLetter()
+UnownLetter Gen3Pokemon::getUnownLetter()
 {
     if (getSpeciesIndexNumber() == 201)
     {
 
         u32 personalityValue = getPersonalityValue();
-        return (
+        return (UnownLetter)((
                    ((personalityValue & 0x03000000) >> 18) +
                    ((personalityValue & 0x00030000) >> 12) +
                    ((personalityValue & 0x00000300) >> 6) +
                    ((personalityValue & 0x00000003) >> 0)) %
-               28;
+               28);
     }
     else
     {
-        return 255;
+        return NO_LETTER;
     }
 };
 
 Nature Gen3Pokemon::getNature()
 {
+    if (internalNature == ANY_NATURE)
+    {
+        return ANY_NATURE;
+    }
+    if (internalNature == NEUTRAL_NATURE)
+    {
+        if ((Nature)(getPersonalityValue() % 25) % 6 == 0)
+        {
+            return NEUTRAL_NATURE;
+        }
+    }
     return (Nature)(getPersonalityValue() % 25);
 };
 
-Gender Gen3Pokemon::getGender()
+Gender Gen3Pokemon::getGender(PokemonTables *pokeTable)
 {
     byte index = getSpeciesIndexNumber();
     u32 threshold = pokeTable->get_gender_threshold(index, true);
@@ -348,16 +409,20 @@ Gender Gen3Pokemon::getGender()
 
 int Gen3Pokemon::getAbilityFromPersonalityValue()
 {
-    if (internalAbility == 255)
+    if (internalAbility == ANY_VALUE)
     {
-        return 255;
+        return ANY_VALUE;
     }
     return getPersonalityValue() & 0b1;
 }
 
 int Gen3Pokemon::getSize()
 {
-    return 255;
+    if (internalSize == ANY_VALUE)
+    {
+        return ANY_VALUE;
+    }
+    return getSize();
 }
 
 bool Gen3Pokemon::getIsShiny()

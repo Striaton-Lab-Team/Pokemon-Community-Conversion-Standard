@@ -7,11 +7,13 @@
 #include "ptgb_save_data_manager.h"
 #endif
 
-PokeBox::PokeBox() { nullMon = new Pokemon(); }
-
-PokeBox::PokeBox(PokemonTables *nTable) { table = nTable; }
-
-void PokeBox::setTable(PokemonTables *nTable) { table = nTable; }
+PokeBox::PokeBox()
+    : boxStorage()
+    , nullMon(new Pokemon())
+    , currIndex(0)
+    , stabilize_mythical(false)
+{
+}
 
 bool PokeBox::addPokemon(Pokemon *currPkmn)
 {
@@ -62,40 +64,36 @@ bool PokeBox::removePokemon(int index)
     return false;
 }
 
+void PokeBox::reset()
+{
+    for (int i = 0; i < currIndex; i++)
+    {
+        delete boxStorage[i];
+        boxStorage[i] = nullptr;
+    }
+    currIndex = 0;
+}
+
 // This used to load our data in from an array
 void PokeBox::loadData(int generation, Language nLang, const byte nDataArray[])
 {
-    switch (nLang)
-    {
-    case ENGLISH:
-        break;
-    case FRENCH:
-        break;
-    case ITALIAN:
-        break;
-    case GERMAN:
-        break;
-    case SPANISH:
-        break;
-    default:
-        return;
-    }
     for (int pkmnIndex = 0; pkmnIndex < nDataArray[0]; pkmnIndex++)
     {
         GBPokemon *newPkmn = nullptr;
         if (generation == 1)
         {
-            newPkmn = new Gen1Pokemon(table);
+            newPkmn = new Gen1Pokemon(nLang);
         }
         else if (generation == 2)
         {
-            newPkmn = new Gen2Pokemon(table);
+            newPkmn = new Gen2Pokemon(nLang);
         }
 
+        int maxPkmn = (nLang == JAPANESE) ? 30 : 20;
         int externalIDOffset = 1;
-        int dataOffset = externalIDOffset + (20 * 1) + 1;
-        int trainerNameOffset = dataOffset + (20 * newPkmn->dataArraySize);
-        int nicknameOffset = trainerNameOffset + (20 * newPkmn->OTArraySize);
+        int dataOffset = externalIDOffset + (maxPkmn * 1) + 1;
+        int trainerNameOffset = dataOffset + (maxPkmn * newPkmn->dataArraySize);
+        int nicknameOffset = trainerNameOffset + (maxPkmn * newPkmn->OTArraySize);
 
         externalIDOffset += pkmnIndex * 1;
         dataOffset += pkmnIndex * newPkmn->dataArraySize;
@@ -113,13 +111,13 @@ void PokeBox::loadData(int generation, Language nLang, const byte nDataArray[])
     }
 }
 
-void PokeBox::convertPkmn(int index)
+void PokeBox::convertPkmn(PokemonTables *table, int index)
 {
-    Gen3Pokemon *convertedPkmn = new Gen3Pokemon(table);
+    Gen3Pokemon *convertedPkmn = new Gen3Pokemon();
     Pokemon *basePkmn = getPokemon(index);
     GBPokemon *oldPkmn = (GBPokemon *)(basePkmn);
 
-    oldPkmn->convertToGen3(convertedPkmn, stabilize_mythical);
+    oldPkmn->convertToGen3(table, convertedPkmn, LEGAL, stabilize_mythical);
 
     // Set the initial checksum so that isEncrypted() correctly returns false
     // for this freshly converted, unencrypted Pokemon.
@@ -129,11 +127,11 @@ void PokeBox::convertPkmn(int index)
     boxStorage[index] = convertedPkmn;
 }
 
-void PokeBox::convertAll()
+void PokeBox::convertAll(PokemonTables *table)
 {
     for (int i = 0; i < currIndex; i++)
     {
-        convertPkmn(i);
+        convertPkmn(table, i);
     }
 }
 
@@ -210,4 +208,16 @@ std::string PokeBox::printDataArray()
     }
     return ss.str();
 }
+
+void PokeBox::print(PokemonTables *pokeTable, std::ostream &os)
+{
+    for (int i = 0; i < currIndex; i++)
+    {
+        os << "\n"
+           << "---------------- " << "POKEMON #" << i << " ----------------" << "\n";
+        boxStorage[i]->print(pokeTable, os);
+        os << "\n";
+    }
+}
+
 #endif

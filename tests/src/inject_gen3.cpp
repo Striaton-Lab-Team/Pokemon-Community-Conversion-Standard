@@ -19,7 +19,7 @@ TEST_CASE("Gen3 Pokémon injection test", "[unit][gen3][injection]")
     u8 comparisonBuffer[32];
     PokemonTables table;
 
-    Gen3Pokemon bulbasaur(&table);
+    Gen3Pokemon bulbasaur;
     bulbasaur.loadData(g3_bulbasaur_data, false);
 
     SECTION("Injecting bulbasaur into box 1")
@@ -82,7 +82,7 @@ TEST_CASE("Gen3 Pokémon injection test", "[unit][gen3][injection][dex]")
     u8 comparisonBuffer[32];
     PokemonTables table;
 
-    Gen3Pokemon bulbasaur(&table);
+    Gen3Pokemon bulbasaur;
     bulbasaur.loadData(g3_bulbasaur_data, false);
 
     FILE *savFile = tmpfile();

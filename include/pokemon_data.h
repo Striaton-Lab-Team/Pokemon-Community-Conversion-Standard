@@ -55,7 +55,7 @@
 
 // these arrays are too small to compress
 extern const u32 EXP_MAXIMUMS[6];
-extern const int GENDER_THRESHOLDS[2][8];
+extern const u8 GENDER_THRESHOLDS[2][8];
 // the next arrays don't compress well at all. Not worth the decompression overhead.
 extern const byte gen_1_index_array[191];
 extern const u8 EVOLUTIONS[POKEMON_ARRAY_SIZE];
@@ -97,6 +97,7 @@ class PokemonTables
 public:
     bool exp_groups_loaded;
     bool gender_ratios_loaded;
+    bool jpn_names_loaded;
     bool num_abilities_loaded;
     bool first_moves_loaded;
     bool power_points_loaded;
@@ -110,6 +111,7 @@ public:
 
     u8 EXP_GROUPS[POKEMON_ARRAY_SIZE];
     u8 GENDER_RATIO[POKEMON_ARRAY_SIZE];
+    u16 JPN_NAMES[POKEMON_ARRAY_SIZE][6];
     bool NUM_ABILITIES[POKEMON_ARRAY_SIZE];
     byte FIRST_MOVES[POKEMON_ARRAY_SIZE];
     u8 POWER_POINTS[252];
@@ -121,6 +123,7 @@ public:
 
     void load_exp_groups();
     void load_gender_ratios();
+    void load_jpn_names();
     void load_num_abilities();
     void load_first_moves();
     void load_power_points();
@@ -131,6 +134,7 @@ public:
 
     u32 get_max_exp(int index_num);
     u8 get_gender_threshold(int index_num, bool is_gen_3);
+    bool get_japanese_name(int index_num, u16 out[]);
     bool get_num_abilities(int index_num);
     bool can_learn_move(int pkmn_index, int move_index);
     byte get_earliest_move(int index_num);

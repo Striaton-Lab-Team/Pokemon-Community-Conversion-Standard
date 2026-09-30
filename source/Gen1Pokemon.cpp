@@ -1,18 +1,28 @@
 #include "Gen1Pokemon.h"
 
-Gen1Pokemon::Gen1Pokemon(PokemonTables *table)
+Gen1Pokemon::Gen1Pokemon(Language nLang)
 {
-    pokeTable = table;
     dataArrayPtr = dataArray;
     dataArraySize = 33;
     generation = 1;
+        
+    if (nLang == JAPANESE)
+    {
+        nicknameArraySize = 6;
+        OTArraySize = 6;
+    }
+    else
+    {
+        nicknameArraySize = 11;
+        OTArraySize = 11;
+    }
 }
 
 #if ON_GBA
 #else
-void Gen1Pokemon::print(std::ostream &os)
+void Gen1Pokemon::print(PokemonTables *pokeTable, std::ostream &os)
 {
-    os << parentPrint()
+    os << parentPrint(pokeTable)
        << "Stats: "
        << "\n\tHP: " << getStatExp(HP) << " Stat EXP, " << getDV(HP) << " DVs"
        << "\n\tAttack: " << getStatExp(ATTACK) << " Stat EXP, " << getDV(ATTACK) << " DVs"

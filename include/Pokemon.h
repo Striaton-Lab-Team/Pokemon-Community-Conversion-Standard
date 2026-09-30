@@ -12,8 +12,7 @@
 #endif
 
 #if USE_CPP_RAND
-#include <ctime>
-#include <cstdlib>
+#include <random>
 #else
 #include "random.h"
 #endif
@@ -31,8 +30,8 @@ inline u32 sizeToMask(int len)
 inline u32 getPureRand() // Gets a random number from the device itself
 {
 #if USE_CPP_RAND
-    srand(time(0));
-    return rand() << 16 | rand();
+    static std::mt19937 engine(std::random_device{}());
+    return static_cast<u32>(engine());
 #else
     return get_rand_u32();
 #endif
@@ -59,21 +58,21 @@ public:
     Pokemon();
     virtual ~Pokemon() {};
     virtual u32 getSpeciesIndexNumber();
-    virtual byte getUnownLetter();
+    virtual UnownLetter getUnownLetter();
     virtual bool getIsShiny();
+    bool getIsHatchable();
+    bool getIsMythical();
+    bool getReversesPID();
+    bool getIsRoamer();
+    bool getIsNido();
+    bool getIsWildEncounter();
 
 #if ON_GBA
 #else
-    virtual void print(std::ostream &os)
+    virtual void print(PokemonTables *pokeTable, std::ostream &os)
     {
         os << "This is a base Pokemon, it has no info!";
     };
-
-    friend std::ostream &operator<<(std::ostream &os, Pokemon &p)
-    {
-        p.print(os);
-        return os;
-    }
 #endif
 
     int dataArraySize;
@@ -91,8 +90,6 @@ public:
     bool isValid;
 
 protected:
-    PokemonTables *pokeTable;
-
     bool isBigEndian;
 
     u32 getVar(const DataVarInfo& dataVar);

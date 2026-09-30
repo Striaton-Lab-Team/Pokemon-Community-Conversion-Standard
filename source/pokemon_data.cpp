@@ -6,6 +6,7 @@
 #include "EXP_GROUPS_lz10_bin.h"
 #include "FIRST_MOVES_lz10_bin.h"
 #include "GENDER_RATIO_lz10_bin.h"
+#include "JPN_NAMES_lz10_bin.h"
 #include "NUM_ABILITIES_lz10_bin.h"
 #include "POWER_POINTS_lz10_bin.h"
 #include "TYPES_lz10_bin.h"
@@ -18,6 +19,7 @@
 #include "EXP_GROUPS_bin.h"
 #include "FIRST_MOVES_bin.h"
 #include "GENDER_RATIO_bin.h"
+#include "JPN_NAMES_bin.h"
 #include "NUM_ABILITIES_bin.h"
 #include "POWER_POINTS_bin.h"
 #include "TYPES_bin.h"
@@ -230,8 +232,8 @@ const u32 EXP_MAXIMUMS[6]{med_fast_max,
     0, // flux_max
     med_slow_max, fast_max, slow_max};
 
-const int GENDER_THRESHOLDS[2][8]{
-    {-1, 2, 4, 8, 12, 14, -1, -1}, {-1, 31, 63, 127, 191, 225, -1, -1}};
+const u8 GENDER_THRESHOLDS[2][8]{
+    {0, 2, 4, 8, 12, 14, 16, 255}, {0, 31, 63, 127, 191, 225, 254, 255}};
 
 const byte MOVESETS[POKEMON_ARRAY_SIZE][32]{
     // This data is stored as 32 bytes of binary data per Pokemon, depending on
@@ -1791,7 +1793,7 @@ PokemonTables::PokemonTables()
     : exp_groups_loaded(false), gender_ratios_loaded(false),
       num_abilities_loaded(false), first_moves_loaded(false),
       power_points_loaded(false), event_pkmn_loaded(false), types_loaded(false),
-      input_charset_type(0), gen3_charset_type(0)
+      input_charset_type(0), gen3_charset_type(LANGUAGE_UNKNOWN)
 {
 }
 
@@ -1812,6 +1814,16 @@ void PokemonTables::load_gender_ratios()
 #else
     load_table(GENDER_RATIO, GENDER_RATIO_bin, GENDER_RATIO_bin_size,
         gender_ratios_loaded);
+#endif
+}
+
+void PokemonTables::load_jpn_names()
+{
+#if ON_GBA
+    load_table((uint8_t *)JPN_NAMES, JPN_NAMES_lz10_bin, jpn_names_loaded);
+#else
+    load_table((uint8_t *)JPN_NAMES, JPN_NAMES_bin, JPN_NAMES_bin_size,
+        jpn_names_loaded);
 #endif
 }
 
@@ -1910,6 +1922,16 @@ u8 PokemonTables::get_gender_threshold(int index_num, bool is_gen_3)
 {
     load_gender_ratios();
     return GENDER_THRESHOLDS[is_gen_3][GENDER_RATIO[index_num]];
+}
+
+bool PokemonTables::get_japanese_name(int index_num, u16 out[])
+{
+    load_jpn_names();
+    for(int i = 0; i < 6; i++)
+    {
+        out[i] = JPN_NAMES[index_num][i];
+    }
+    return true;
 }
 
 // If the Pokemon has two abilities it returns a 1, since ability 1 is valid.
