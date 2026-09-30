@@ -1,6 +1,7 @@
 #include "GBPokemon.h"
 #include "pccs_utils.h"
 #include <cstring>
+#include "Pokemon.h"
 
 #if ACCESS_POKEDEX
 #include "ptgb_save_data_manager.h"
@@ -748,25 +749,28 @@ bool GBPokemon::convertNickname(PokemonTables *pokeTable, Gen3Pokemon *newPkmn)
             out_name[i] = pokeTable->get_gen_3_char(jpn_name[i]);
         }
         newPkmn->setNicknameArray(out_name, 6);
+        return true;
     }
     else
     {
         pokeTable->load_input_charset(generation, getLanguage());
-        break;
-    }
-    pokeTable->load_gen3_charset(getLanguage());
-    for (int i = 0; i < 10; i++)
-    {
-        if(nicknameArray[i] == POKEGB_STRING_TERMINATOR)
+        pokeTable->load_gen3_charset(getLanguage());
+
+        bool terminatorHit = false;
+        for (int i = 0; i < 10; i++)
         {
-            newPkmn->setNicknameLetter(i, POKEGBA_STRING_TERMINATOR);
+            if(nicknameArray[i] == POKEGB_STRING_TERMINATOR || terminatorHit)
+            {
+                newPkmn->setNicknameLetter(i, POKEGBA_STRING_TERMINATOR);
+                terminatorHit = true;
+            }
+            else
+            {
+                newPkmn->setNicknameLetter(i, pokeTable->get_gen_3_char(pokeTable->input_charset[nicknameArray[i]]));
+            }
         }
-        else
-        {
-            newPkmn->setNicknameLetter(i, pokeTable->get_gen_3_char(pokeTable->input_charset[nicknameArray[i]]));
-        }
+        return true;
     }
-    return true;
 };
 
 bool GBPokemon::convertLanguage(Gen3Pokemon *newPkmn)
@@ -798,58 +802,59 @@ bool GBPokemon::convertTrainerNickname(PokemonTables *pokeTable, Gen3Pokemon *ne
     {
         byte new_name[7] = {0x8B, 0xAE, 0x79, 0x95, 0xFF, 0x00, 0x00}; // ゴールド Gold, name of the player character in Gold/Silver
         newPkmn->setOTArray(new_name, 7);
+        return true;
     }
     else
     {
         pokeTable->load_input_charset(generation, getLanguage());
-        break;
-    }
-    pokeTable->load_gen3_charset(getLanguage());
+        pokeTable->load_gen3_charset(getLanguage());
 
-    /*
-     * So... in-game trades just put 0x5D 0x50 as the first 2 bytes of the OT name.
-     * 0x5D is a control character that gets drawn as TRAINER (or a translation of it)
-     *
-     * But we actually need to replace it with such a string when we convert to gen 3,
-     * because gen3 doesn't support it!
-     */
-    if(OTArray[0] == TRAINER_STRING_CONTROL_CHAR && OTArray[1] == POKEGB_STRING_TERMINATOR)
-    {
-        const char *curTrainerString = TRAINER_STRINGS[static_cast<int>(getLanguage())];
-        u16 codepoint;
-        u32 numBytes;
-
-        // fill the OT array with the terminator first.
-        memset(OTArray, POKEGB_STRING_TERMINATOR, OT_SIZE);
-
-        // Now convert the hardcoded TRAINER variant string into the OT array.
-        for(unsigned i = 0; i < OT_SIZE; ++i)
+        /*
+        * So... in-game trades just put 0x5D 0x50 as the first 2 bytes of the OT name.
+        * 0x5D is a control character that gets drawn as TRAINER (or a translation of it)
+        *
+        * But we actually need to replace it with such a string when we convert to gen 3,
+        * because gen3 doesn't support it!
+        */
+        if(OTArray[0] == TRAINER_STRING_CONTROL_CHAR && OTArray[1] == POKEGB_STRING_TERMINATOR)
         {
-            if(*curTrainerString == '\0')
+            const char *curTrainerString = TRAINER_STRINGS[static_cast<int>(getLanguage())];
+            u16 codepoint;
+            u32 numBytes;
+
+            // fill the OT array with the terminator first.
+            memset(OTArray, POKEGB_STRING_TERMINATOR, OT_SIZE);
+
+            // Now convert the hardcoded TRAINER variant string into the OT array.
+            for(unsigned i = 0; i < OT_SIZE; ++i)
             {
-                break;
+                if(*curTrainerString == '\0')
+                {
+                    break;
+                }
+
+                numBytes = convert_utf8_to_utf16_char((const u8*)(curTrainerString), codepoint);
+                curTrainerString += numBytes;
+
+                OTArray[i] = get_char_from_charset(pokeTable->input_charset, codepoint);
             }
-
-            numBytes = convert_utf8_to_utf16_char((const u8*)(curTrainerString), codepoint);
-            curTrainerString += numBytes;
-
-            OTArray[i] = get_char_from_charset(pokeTable->input_charset, codepoint);
         }
-    }
 
-    for (int i = 0; i < OT_SIZE; i++)
-    {
-        if(OTArray[i] == POKEGB_STRING_TERMINATOR)
+        bool terminatorHit = false;
+        for (int i = 0; i < OT_SIZE; i++)
         {
-            newPkmn->setOTLetter(i, POKEGBA_STRING_TERMINATOR);
+            if(OTArray[i] == POKEGB_STRING_TERMINATOR || terminatorHit)
+            {
+                newPkmn->setOTLetter(i, POKEGBA_STRING_TERMINATOR);
+                terminatorHit = true;
+            }
+            else
+            {
+                newPkmn->setOTLetter(i, pokeTable->get_gen_3_char(pokeTable->input_charset[OTArray[i]]));
+            }
         }
-        else
-        {
-            newPkmn->setOTLetter(i, pokeTable->get_gen_3_char(pokeTable->input_charset[OTArray[i]]));
-        }
+        return true;
     }
-
-    return true;
 };
 
 bool GBPokemon::convertMarkings(Gen3Pokemon *newPkmn)
