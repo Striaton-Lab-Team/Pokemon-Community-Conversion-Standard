@@ -54,7 +54,7 @@ bool PokeBox::removePokemon(int index)
 {
     if (index < currIndex)
     {
-        for (int i = index; i < currIndex; i++)
+        for (int i = index; i < (currIndex - 1); i++)
         {
             boxStorage[i] = boxStorage[i + 1];
         }
