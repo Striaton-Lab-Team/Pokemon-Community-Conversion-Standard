@@ -1,6 +1,8 @@
 #ifndef GBPOKEMON_H
 #define GBPOKEMON_H
 
+#include <cstddef>
+
 #include "Pokemon.h"
 #include "Gen3Pokemon.h"
 
@@ -13,7 +15,7 @@ protected:
     byte nicknameArray[11];
     byte OTArray[11];
     byte externalIndexNumber;
-    Language lang = (Language)0;
+    Language lang = LANGUAGE_UNKNOWN;
 
     static const DataVarInfo
         // All of the data info variables
@@ -38,11 +40,16 @@ protected:
 // This is used to easily print out a Pokemon, when using a standard C++ terminal
 #if ON_GBA
 #else
-    std::string parentPrint();
+    std::string parentPrint(PokemonTables *pokeTable);
 #endif
 
 public:
-    virtual void loadData(Language nLang, byte nDataArray[], byte nNicknameArray[], byte nOTArray[], byte nExternalIndexNum);
+    void loadData(Language nLang, const byte nDataArray[], const byte nNicknameArray[], const byte nOTArray[], byte nExternalIndexNum);
+
+    /**
+     * @brief This overload allows you to load a Pokémon from a PK1 or PK2 file.
+     */
+    void loadData(Language nLang, const byte pkFileData[], size_t pkFileDataSize);
 
     // All of the simple getters and setters are defined here
     u32 getLevel() { return getVar(level[generation - 1]); }
@@ -102,51 +109,51 @@ public:
     u32 getDV(Stat currStat);
     bool setDV(Stat currStat, byte newVal);
 
-    // These is virtual so it can be overwitten in Gen 1
+    // These are virtual so it can be overwitten in Gen 1
 
     // These aren't direct variables, but they're useful to have
     Language getLanguage() { return lang; };
-    byte getUnownLetter();
-    Gender getGender();
+    UnownLetter getUnownLetter() override;
+    Gender getGender(PokemonTables *pokeTable);
     Nature getVirtualConsoleNature();
-    bool getIsShiny();
-    bool externalConvertNickname(byte outputArray[]);
-
+    bool getIsShiny() override;
+    bool externalConvertNickname(PokemonTables *pokeTable, byte outputArray[]);
+    u32 getIndividualDataChecksum();
+    
     // And this is for all the conversion stuff
-    bool convertToGen3(Gen3Pokemon *newPkmn, bool sanitizeMythicals);
-    bool loadEvent(Gen3Pokemon *newPkmn);
+    bool convertToGen3(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method, bool sanitizeMythicals=true);
+    bool loadEvent(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method);
 
-    bool generatePersonalityValue(Gen3Pokemon *newPkmn, RNGMethod rng);
+    bool generatePersonalityValueAndIVs(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method, bool isEvent);
     bool convertTrainerID(Gen3Pokemon *newPkmn);
-    bool convertNickname(Gen3Pokemon *newPkmn);
+    bool convertNickname(PokemonTables *pokeTable, Gen3Pokemon *newPkmn);
     bool convertLanguage(Gen3Pokemon *newPkmn);
     bool convertMiscFlags(Gen3Pokemon *newPkmn);
-    bool convertTrainerNickname(Gen3Pokemon *newPkmn);
+    bool convertTrainerNickname(PokemonTables *pokeTable, Gen3Pokemon *newPkmn);
     bool convertMarkings(Gen3Pokemon *newPkmn);
     // Data
     bool convertSpeciesIndexNumber(Gen3Pokemon *newPkmn);
     bool convertItem(Gen3Pokemon *newPkmn);
-    bool convertEXP(Gen3Pokemon *newPkmn);
+    bool convertEXP(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertFriendship(Gen3Pokemon *newPkmn);
-    bool convertMoves(Gen3Pokemon *newPkmn);
-    bool convertEVs(Gen3Pokemon *newPkmn);
+    bool convertMoves(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method);
+    bool convertEVs(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertContestConditions(Gen3Pokemon *newPkmn);
-    bool convertPokerus(Gen3Pokemon *newPkmn);
-    bool convertMetLocation(Gen3Pokemon *newPkmn);
-    bool convertMetLevel(Gen3Pokemon *newPkmn);
-    bool convertGameOfOrigin(Gen3Pokemon *newPkmn);
+    bool convertPokerus(Gen3Pokemon *newPkmn, ConversionMethod method);
+    bool convertMetLocation(Gen3Pokemon *newPkmn, ConversionMethod method);
+    bool convertMetLevel(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method);
+    bool convertGameOfOrigin(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertPokeball(Gen3Pokemon *newPkmn);
-    bool convertTrainerGender(Gen3Pokemon *newPkmn);
-    bool convertIVs(Gen3Pokemon *newPkmn);
-    bool convertAbilityFlag(Gen3Pokemon *newPkmn);
-    bool convertRibbonsAndObedience(Gen3Pokemon *newPkmn);
+    bool convertTrainerGender(Gen3Pokemon *newPkmn, ConversionMethod method);
+    bool convertAbilityFlag(PokemonTables *pokeTable, Gen3Pokemon *newPkmn);
+    bool convertRibbonsAndObedience(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool convertShininess(Gen3Pokemon *newPkmn);
     // Extra
     bool setRequestedLetter(Gen3Pokemon *newPkmn);
-    bool setRequestedNature(Gen3Pokemon *newPkmn);
-    bool setRequestedGender(Gen3Pokemon *newPkmn);
-    bool setRequestedAbility(Gen3Pokemon *newPkmn);
-    bool setRequestedSize(Gen3Pokemon *newPkmn);
+    bool setRequestedNature(Gen3Pokemon *newPkmn, ConversionMethod method);
+    bool setRequestedGender(PokemonTables *pokeTable, Gen3Pokemon *newPkmn);
+    bool setRequestedAbility(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method);
+    bool setRequestedSize(Gen3Pokemon *newPkmn, ConversionMethod method);
 };
 
 #endif

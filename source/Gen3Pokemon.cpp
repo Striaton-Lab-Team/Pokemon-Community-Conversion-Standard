@@ -1,16 +1,43 @@
 #include "Gen3Pokemon.h"
+#include "pccs_utils.h"
+#include <cstring>
 
-Gen3Pokemon::Gen3Pokemon(PokemonTables *table)
+using namespace PCCSUtils;
+
+// determines the substructure offsets based on the personality value, and sets the substructOffsets array accordingly.
+// This array will contain the index offsets for the substructs, in the order of G, A, E, M
+static void determineSubstructOffsets(u32 substructLehmerCode, u8 *substructOffsets)
 {
-    pokeTable = table;
+    // This array will contain the order of the substruct indices. (0=G, 1=A, 2=E, 3=M)
+    u8 newIndexOrder[4];
+    extractLehmerCode4(substructLehmerCode, newIndexOrder);
+
+    for(u8 i=0; i < 4; ++i)
+    {
+        // so, we kinda need to reverse things: newIndexOrder tells us on every position which substruct should be there.
+        // but substructOffsets maps a specific substruct to its offset in the specific GAEM order.
+        substructOffsets[newIndexOrder[i]] = i;
+    }
+}
+
+Gen3Pokemon::Gen3Pokemon()
+{
     dataArrayPtr = dataArray;
     dataArraySize = 80;
     nicknameArrayPtr = &dataArray[0x8];
     OTArrayPtr = &dataArray[0x14];
     isBigEndian = false;
-    isEncrypted = false;
     generation = 3;
+    currSubstructureLehmerCode = 0;
 };
+
+Gen3Pokemon::Gen3Pokemon(const Gen3Pokemon &other)
+    : Gen3Pokemon()
+{
+    currSubstructureLehmerCode = other.currSubstructureLehmerCode;
+    memcpy(substructOffsets, other.substructOffsets, sizeof(substructOffsets));
+    memcpy(dataArray, other.dataArray, sizeof(dataArray));
+}
 
 bool Gen3Pokemon::convertToGen3(Gen3Pokemon *g3p)
 {
@@ -20,23 +47,23 @@ bool Gen3Pokemon::convertToGen3(Gen3Pokemon *g3p)
 // This is used to easily print out a Pokemon, when using a standard C++ terminal
 #if ON_GBA
 #else
-void Gen3Pokemon::print(std::ostream &os)
+void Gen3Pokemon::print(PokemonTables *pokeTable, std::ostream &os)
 {
     updateChecksum();
-    updateSubstructureShift();
+    updateSubstructureOrder(true);
 
     pokeTable->load_gen3_charset(ENGLISH);
-    if (!isValid)
-    {
-        os << "ERROR: POKEMON IS INVALID\n";
-    }
-    else
+    // if (!isValid)
+    // {
+    //     os << "ERROR: POKEMON IS INVALID\n";
+    // }
+    // else
     {
         os
             << "Personality Value: " << std::hex << getPersonalityValue() << std::dec
             << "\n\tLetter: " << (int)getUnownLetter()
             << "\n\tNature: " << getNature()
-            << "\n\tGender: " << getGender() << '\n'
+            << "\n\tGender: " << getGender(pokeTable) << '\n'
             << "Trainer ID: " << getTrainerID() << "\n"
             << "Secret ID: " << getSecretID() << "\n"
             << "Nickname: [";
@@ -113,27 +140,55 @@ void Gen3Pokemon::print(std::ostream &os)
            << "Fateful Encounter/Obedience: " << getFatefulEncounterObedience() << "\n"
            << "Is Shiny: " << getIsShiny() << "\n"
            << "\n"
-           << "Substructure Perm: " << currSubstructureShift << "\n"
+           << "Substructure Perm: " << currSubstructureLehmerCode << "\n"
            << "Encryption Key: " << std::hex << ((getTrainerID() | getSecretID() << 16) ^ getPersonalityValue()) << std::dec << "\n"
            << "Substructure offsets:"
-           << "\n\tG: " << substructOffsets[SUB_G]
-           << "\n\tA: " << substructOffsets[SUB_A]
-           << "\n\tE: " << substructOffsets[SUB_E]
-           << "\n\tM: " << substructOffsets[SUB_M]
+           << "\n\tG: " << getSubstructOffset(SUB_G)
+           << "\n\tA: " << getSubstructOffset(SUB_A)
+           << "\n\tE: " << getSubstructOffset(SUB_E)
+           << "\n\tM: " << getSubstructOffset(SUB_M)
            << "\n";
     }
 };
-std::string Gen3Pokemon::printDataArray(bool encrypedData)
+std::string Gen3Pokemon::printDataArray(bool encryptedData)
 {
-    updateSubstructureShift();
+    updateSubstructureOrder(true);
     updateChecksum();
-    encryptSubstructures();
+    if(encryptedData)
+    {
+        encryptSubstructures();
+    }
+    else
+    {
+        decryptSubstructures();
+    }
     std::stringstream ss;
     for (int i = 0; i < 80; i++)
     {
         ss << std::hex << std::setw(2) << std::setfill('0') << (int)dataArray[i] << (i < 79 ? " " : "");
     }
     return ss.str();
+}
+std::array<byte, 80> Gen3Pokemon::outputByteArray(bool encryptedData, bool standardizeSubstruct)
+{
+    updateSubstructureOrder(true);
+    updateChecksum();
+    if(encryptedData)
+    {
+        encryptSubstructures();
+    }
+    else
+    {
+        decryptSubstructures();
+    }
+    
+    if(standardizeSubstruct)
+    {
+        resetSubstructureOrder();
+    }
+    std::array<byte, 80> output{};
+    std::memcpy(output.data(), dataArray, output.size());
+    return output;
 }
 #endif
 
@@ -174,179 +229,163 @@ bool Gen3Pokemon::setPersonalityValue(u32 newVal) // Setting the Personality Val
     return successful;
 }
 
-bool Gen3Pokemon::setAbility(u32 newVal) // We need to check if they have two abilities
+bool Gen3Pokemon::setAbility(PokemonTables *pokeTable, u32 newVal) // We need to check if they have two abilities
 {
     if (pokeTable->get_num_abilities(getSpeciesIndexNumber()) == 0)
     {
         newVal = 0;
     }
     internalAbility = newVal;
-    return setVar(ability, substructOffsets[SUB_M], newVal);
+    return setVar(ability, getSubstructOffset(SUB_M), newVal);
 }
 
 // This is used to load our data in from an array and mark it as encrypted
-void Gen3Pokemon::loadData(byte incomingArray[])
+void Gen3Pokemon::loadData(const byte incomingArray[], bool areSubstructsShuffled)
 {
-    for (int i = 0; i < dataArraySize; i++)
-    {
-        dataArrayPtr[i] = incomingArray[i];
-    }
-    isEncrypted = true;
+    memcpy(dataArrayPtr, incomingArray, dataArraySize);
+    // reset currSubstructureLehmerCode before calling updateSubstructureOrder
+    currSubstructureLehmerCode = areSubstructsShuffled ? 0xFFFFFFFF : 0;
+    updateSubstructureOrder(!areSubstructsShuffled);
 }
 
 // And then some general functions
 void Gen3Pokemon::decryptSubstructures()
 {
-    if (isEncrypted)
+    if (isEncrypted())
     {
-        u32 key = (getTrainerID() | getSecretID() << 16) ^ getPersonalityValue();
-        for (int i = 0; i < 48; i++)
-        {
-            dataArrayPtr[0x20 + i] ^= ((key >> (8 * (i % 4))) & 0xFF);
-        }
+        cryptStructures();
     }
 };
 
 void Gen3Pokemon::encryptSubstructures()
 {
-    if (!isEncrypted)
+    if (!isEncrypted())
     {
-        u32 key = (getTrainerID() | getSecretID() << 16) ^ getPersonalityValue();
-        for (int i = 0; i < 48; i++)
-        {
-            dataArrayPtr[0x20 + i] ^= ((key >> (8 * (i % 4))) & 0xFF);
-        }
+        cryptStructures();
     }
 };
 
 void Gen3Pokemon::updateChecksum()
 {
-    bool encryptionState = isEncrypted;
+    const bool encryptionState = isEncrypted();
     decryptSubstructures();
-    int checksum = 0x0000;
-    for (int i = 0; i < 48; i = i + 2)
-    {
-        checksum = checksum + ((dataArrayPtr[0x20 + i + 1] << 8) | dataArrayPtr[0x20 + i]);
-    }
+    const u32 checksum = calculateChecksum();
     setChecksum(checksum);
+
+    // re-encrypt if it was originally encrypted, since we don't want to mess with the encryption state of the data.
     if (encryptionState)
     {
         encryptSubstructures();
     }
 }
 
-void Gen3Pokemon::updateSubstructureShift()
+void Gen3Pokemon::updateSubstructureOrder(bool shouldMove)
 {
-    int structureVal = getPersonalityValue() % 24;
-    if (structureVal == currSubstructureShift)
-    {
-        return;
-    }
-    currSubstructureShift = structureVal;
+    u8 newSubstructOffsets[4];
+    const u32 structureVal = getPersonalityValue() % 24;
 
-    resetSubstructureShift();
-
-#define MAX_LEN 4
-    int index = 0;
-    while (index < MAX_LEN)
-    {
-        int len = MAX_LEN - index;
-        int factorial = 1;
-        for (int i = 1; i < len; i++)
-        {
-            factorial *= i;
-        }
-        int swapLoc = (structureVal / factorial) + index;
-        for (int i = index; i < swapLoc; i++)
-        {
-            swapSubstructures(index, (i + 1));
-        }
-        index += 1;
-        structureVal %= factorial;
-    }
-}
-
-void Gen3Pokemon::resetSubstructureShift()
-{
-    for (int currDest = 0; currDest < 4; currDest++)
-    {
-        for (int i = 0; i < 4; i++)
-        {
-            if ((substructOffsets[i] / 12) == currDest)
-            {
-                swapSubstructures(currDest, i);
-            }
-        }
-    }
-}
-
-void Gen3Pokemon::swapSubstructures(int indexOne, int indexTwo)
-{
-    if (indexOne == indexTwo)
+    if(structureVal == currSubstructureLehmerCode)
     {
         return;
     }
 
-    byte tempByte;
-    for (int i = 0; i < 12; i++)
+    currSubstructureLehmerCode = structureVal;
+    determineSubstructOffsets(structureVal, newSubstructOffsets);
+
+    if(shouldMove)
     {
-        tempByte = dataArrayPtr[0x20 + (indexOne * 12) + i];
-        dataArrayPtr[0x20 + (indexOne * 12) + i] = dataArrayPtr[0x20 + (indexTwo * 12) + i];
-        dataArrayPtr[0x20 + (indexTwo * 12) + i] = tempByte;
+        u8 tempBuffer[48];
+        uintptr_t oldOffset;
+        uintptr_t newOffset;
+        u8 *dataSectionStartPtr = dataArrayPtr + GEN3_PKMN_DATA_SUBSTRUCT_OFFSET;
+        u32 i;
+
+        // first we copy the old data sections into a temporary buffer, since they might get overwritten during the move process.
+        memcpy(tempBuffer, dataSectionStartPtr, 48);
+
+        // now we copy the data from the temporary buffer to the correct new locations in the data array, based on the new substructure offsets.
+        // for each of the substructures (G, A, E, M), we find where it is currently located in the data array using substructOffsets, and then 
+        // we copy it to its new location based on newSubstructOffsets.
+        for(i=0; i < 4; ++i)
+        {
+            oldOffset = substructOffsets[i] * GEN3_POKEMON_SUBSTRUCTURE_SIZE;
+            newOffset = newSubstructOffsets[i] * GEN3_POKEMON_SUBSTRUCTURE_SIZE;
+            memcpy(dataSectionStartPtr + newOffset, tempBuffer + oldOffset, GEN3_POKEMON_SUBSTRUCTURE_SIZE);
+        }
     }
 
-    int valOne = 0;
-    int valTwo = 0;
-    int tempInt;
+    memcpy(substructOffsets, newSubstructOffsets, sizeof(newSubstructOffsets));
+}
 
-    for (int i = 0; i < 4; i++)
+void Gen3Pokemon::resetSubstructureOrder()
+{
+    u8 newSubstructOffsets[4] = {0, 1, 2, 3};
+
+    u8 tempBuffer[48];
+    uintptr_t oldOffset;
+    uintptr_t newOffset;
+    u8 *dataSectionStartPtr = dataArrayPtr + GEN3_PKMN_DATA_SUBSTRUCT_OFFSET;
+    u32 i;
+
+    // first we copy the old data sections into a temporary buffer, since they might get overwritten during the move process.
+    memcpy(tempBuffer, dataSectionStartPtr, 48);
+
+    // now we copy the data from the temporary buffer to the correct new locations in the data array, based on the new substructure offsets.
+    // for each of the substructures (G, A, E, M), we find where it is currently located in the data array using substructOffsets, and then 
+    // we copy it to its new location based on newSubstructOffsets.
+    for(i=0; i < 4; ++i)
     {
-        if (substructOffsets[i] == indexOne * 12)
-        {
-            valOne = i;
-        }
-        if (substructOffsets[i] == indexTwo * 12)
-        {
-            valTwo = i;
-        }
+        oldOffset = substructOffsets[i] * GEN3_POKEMON_SUBSTRUCTURE_SIZE;
+        newOffset = newSubstructOffsets[i] * GEN3_POKEMON_SUBSTRUCTURE_SIZE;
+        memcpy(dataSectionStartPtr + newOffset, tempBuffer + oldOffset, GEN3_POKEMON_SUBSTRUCTURE_SIZE);
     }
-    tempInt = substructOffsets[valOne];
-    substructOffsets[valOne] = substructOffsets[valTwo];
-    substructOffsets[valTwo] = tempInt;
+    
+    memcpy(substructOffsets, newSubstructOffsets, sizeof(newSubstructOffsets));
 }
 
 void Gen3Pokemon::updateSecurityData()
 {
-    updateSubstructureShift();
+    updateSubstructureOrder(true);
     updateChecksum();
     encryptSubstructures();
 }
 
-byte Gen3Pokemon::getUnownLetter()
+UnownLetter Gen3Pokemon::getUnownLetter()
 {
     if (getSpeciesIndexNumber() == 201)
     {
 
         u32 personalityValue = getPersonalityValue();
-        return (
+        return (UnownLetter)((
                    ((personalityValue & 0x03000000) >> 18) +
                    ((personalityValue & 0x00030000) >> 12) +
                    ((personalityValue & 0x00000300) >> 6) +
                    ((personalityValue & 0x00000003) >> 0)) %
-               28;
+               28);
     }
     else
     {
-        return 255;
+        return NO_LETTER;
     }
 };
 
 Nature Gen3Pokemon::getNature()
 {
+    if (internalNature == ANY_NATURE)
+    {
+        return ANY_NATURE;
+    }
+    if (internalNature == NEUTRAL_NATURE)
+    {
+        if ((Nature)(getPersonalityValue() % 25) % 6 == 0)
+        {
+            return NEUTRAL_NATURE;
+        }
+    }
     return (Nature)(getPersonalityValue() % 25);
 };
 
-Gender Gen3Pokemon::getGender()
+Gender Gen3Pokemon::getGender(PokemonTables *pokeTable)
 {
     byte index = getSpeciesIndexNumber();
     u32 threshold = pokeTable->get_gender_threshold(index, true);
@@ -370,16 +409,20 @@ Gender Gen3Pokemon::getGender()
 
 int Gen3Pokemon::getAbilityFromPersonalityValue()
 {
-    if (internalAbility == 255)
+    if (internalAbility == ANY_VALUE)
     {
-        return 255;
+        return ANY_VALUE;
     }
     return getPersonalityValue() & 0b1;
 }
 
 int Gen3Pokemon::getSize()
 {
-    return 255;
+    if (internalSize == ANY_VALUE)
+    {
+        return ANY_VALUE;
+    }
+    return getSize();
 }
 
 bool Gen3Pokemon::getIsShiny()
@@ -406,6 +449,46 @@ bool Gen3Pokemon::setOTArray(byte otArr[], int otArrSize)
         setOTLetter(i, otArr[i]);
     }
     return true;
+}
+
+bool Gen3Pokemon::isEncrypted()
+{
+    const u16 checksum = calculateChecksum();
+
+    // the checksum is calculated on the decrypted data substruct.
+    // So if the checksum doesn't match, then the data must still be encrypted.
+    return (getChecksum() != checksum);
+}
+
+u16 Gen3Pokemon::calculateChecksum()
+{
+    u8 *cur = dataArrayPtr + GEN3_PKMN_DATA_SUBSTRUCT_OFFSET;
+    const u8* const end = cur + 48;
+    u16 checksum = 0x0000;
+    u16 curWord;
+    while(cur < end)
+    {
+        cur = PCCSUtils::readUint16(cur, curWord, Endianness::LITTLE);
+        checksum += curWord;
+    }
+    return checksum;
+}
+
+void Gen3Pokemon::cryptStructures()
+{
+    const u32 key = (getTrainerID() | getSecretID() << 16) ^ getPersonalityValue();
+    u32 *cur = (u32*)(dataArrayPtr + GEN3_PKMN_DATA_SUBSTRUCT_OFFSET);
+    const u32 * const end = cur + (48 / sizeof(u32));
+
+    // This operation should be the same for any endianness, since the key is just a u32 and the data is just being treated as an array of bytes. So we can just do it as u32s for speed.
+    // that means: on a little endian system, the key will be stored in little endian and when reading the data as u32s, it will also be read in little endian, 
+    // so the bytes will line up correctly for the XOR operation. On a big endian system, the key will be stored in big endian and when reading the data as u32s, 
+    // it will also be read in big endian, so the bytes will also line up correctly for the XOR operation.
+    while(cur < end)
+    {
+        *cur ^= key;
+        ++cur;
+    }
 }
 
 #pragma region

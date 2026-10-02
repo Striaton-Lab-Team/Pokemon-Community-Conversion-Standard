@@ -2,15 +2,15 @@
 export MKFILE_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 export TMPDIR=/tmp
 # -------- Directory layout --------
-BUILDDIR := $(MKFILE_DIR)/build
+BUILDDIR := $(MKFILE_DIR)build
 OBJDIR   := $(BUILDDIR)
-LIBDIR   := $(MKFILE_DIR)/lib
-DATA	 := $(MKFILE_DIR)/data
+LIBDIR   := $(MKFILE_DIR)lib
+DATA	 := $(MKFILE_DIR)data
 
 ifneq ($(CXX),arm-none-eabi-g++)
 # Not on GBA. set bin2s dir to tools dir,
 # because we need to use our locally built tool. (see bin2s_tool target below)
-export BIN2S_DIR := $(MKFILE_DIR)/tools/bin2s/
+export BIN2S_DIR := $(MKFILE_DIR)tools/bin2s/
 else
 # On GBA, bin2s comes with devkitPro.
 export BIN2S_DIR :=
@@ -34,13 +34,32 @@ endef
 ifneq (build,$(notdir $(CURDIR)))
 # -------- Cleanup --------
 # -------- Top-level targets --------
-.PHONY: all lib clean dirs symlinks
-all: dirs generate_tables bin2s_tool lib
+.PHONY: all all_internal lib clean dirs symlinks
 
-lib: generate_tables bin2s_tool
-	@$(MAKE) -C build -f $(MKFILE_DIR)/Makefile
-	cp build/*.h lib/include/
-	cp -r include lib/
+ifeq ($(CXX),arm-none-eabi-g++)
+BUILD_FLAVOR := gba
+else
+BUILD_FLAVOR := host
+endif
+
+TABLES_STAMP := $(BUILDDIR)/.tables.$(BUILD_FLAVOR).stamp
+TABLE_GEN_INPUTS := $(shell find $(MKFILE_DIR)tools/table-generator -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.hpp" -o -name "Makefile" \))
+
+all:
+	@set -e; \
+	before=$$(stat -c %Y $(LIBDIR)/libpccs.a 2>/dev/null || echo 0); \
+	$(MAKE) --no-print-directory all_internal; \
+	after=$$(stat -c %Y $(LIBDIR)/libpccs.a 2>/dev/null || echo 0); \
+	if [ "$$before" = "$$after" ] && [ "$$after" != "0" ]; then \
+		echo "PCCS build up to date."; \
+	fi
+
+all_internal: dirs $(TABLES_STAMP) bin2s_tool lib
+
+lib: $(TABLES_STAMP) bin2s_tool
+	@$(MAKE) -C build -f $(MKFILE_DIR)Makefile
+	cp -u build/*.h lib/include/
+	cp -ru include lib/
 
 # Ensure the build directories exist
 dirs:
@@ -52,7 +71,7 @@ dirs:
 # But that means we need to build it ourselves here when not building for GBA.
 bin2s_tool:
 ifneq ($(CXX),arm-none-eabi-g++)
-	$(MAKE) -C $(MKFILE_DIR)/tools/bin2s
+	$(MAKE) -C $(MKFILE_DIR)tools/bin2s
 else
 	@echo "Skip building bin2s, it comes with DevkitPro!"
 endif
@@ -67,7 +86,7 @@ endif
 # But for compatibility with MSYS2 MinGW64 in Windows, we can't use env -i
 # Instead we need to use env like below and make sure we pass things like the temp dirs
 # otherwise it won't compile with MinGW64
-generate_tables:
+$(TABLES_STAMP): $(TABLE_GEN_INPUTS) $(MKFILE_DIR)compress_lz10.sh | dirs
 	mkdir -p data
 	mkdir -p to_compress
 	@env - \
@@ -98,18 +117,19 @@ endif
 	@echo
 	@echo "----------------------------------------------------------------"
 	@echo
+	@touch $@
 
 clean:
 	$(MAKE) -C tools/table-generator clean
 	$(MAKE) -C tools/bin2s clean
-	rm -rf $(BUILDDIR) $(MKFILE_DIR)/data $(MKFILE_DIR)/to_compress $(LIBDIR)
+	rm -rf $(BUILDDIR) $(MKFILE_DIR)data $(MKFILE_DIR)to_compress $(LIBDIR)
 
 else
 # -------- Toolchain defaults (can be overridden by parent) --------
 CC       ?= gcc
 CXX      ?= g++
 AR       ?= ar
-CFLAGS   ?= -O2
+CFLAGS   ?= -Os -fno-rtti -fno-exceptions -fno-unwind-tables -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -g
 CXXFLAGS ?= $(CFLAGS)
 LDFLAGS  ?=
 SOFLAGS  ?= -shared
@@ -126,10 +146,10 @@ SHARED_MAJOR   := lib$(TARGET).so.$(MAJOR_VERSION)
 SHARED_UNVER   := lib$(TARGET).so
 
 # -------- Automatic source scanning --------
-C_SOURCES   := $(wildcard $(MKFILE_DIR)/source/*.c)
-CPP_SOURCES := $(wildcard $(MKFILE_DIR)/source/*.cpp)
+C_SOURCES   := $(wildcard $(MKFILE_DIR)source/*.c)
+CPP_SOURCES := $(wildcard $(MKFILE_DIR)source/*.cpp)
 SOURCES     := $(C_SOURCES) $(CPP_SOURCES)
-INCLUDES    := $(MKFILE_DIR)/include $(INCLUDE) -I$(OBJDIR)
+INCLUDES    := $(MKFILE_DIR)include $(INCLUDE) -I$(OBJDIR)
 BINFILES	:= $(wildcard $(DATA)/*.bin)
 
 BINOFILES := $(addprefix $(OBJDIR)/,$(notdir $(BINFILES:.bin=.bin.o)))
@@ -140,7 +160,7 @@ OBJS += $(addprefix $(OBJDIR)/,$(notdir $(CPP_SOURCES:.cpp=.o)))
 OBJS += $(BINOFILES)
 #OBJS += $(patsubst $(DATA)/%.bin,$(OBJDIR)/%.bin.o,$(BINFILES))
 
-VPATH += $(MKFILE_DIR)/source $(DATA)
+VPATH += $(MKFILE_DIR)source $(DATA)
 
 # -------- Top-level targets --------
 .PHONY: all symlinks

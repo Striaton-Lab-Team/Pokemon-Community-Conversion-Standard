@@ -55,7 +55,7 @@
 
 // these arrays are too small to compress
 extern const u32 EXP_MAXIMUMS[6];
-extern const int GENDER_THRESHOLDS[2][8];
+extern const u8 GENDER_THRESHOLDS[2][8];
 // the next arrays don't compress well at all. Not worth the decompression overhead.
 extern const byte gen_1_index_array[191];
 extern const u8 EVOLUTIONS[POKEMON_ARRAY_SIZE];
@@ -75,7 +75,7 @@ extern const u8 EVOLUTIONS[POKEMON_ARRAY_SIZE];
 extern const byte MOVESETS[POKEMON_ARRAY_SIZE][32];
 
 /**
- * Okay, here's the thing: to reduce the rom size, we compressed a bunch of data with ZX0
+ * Okay, here's the thing: to reduce the rom size, we compressed a bunch of data
  * Among this data are various data tables that were previously just stored as const arrays.
  *
  * But, during the mystery_gift_builder/mystery_gift_injector execution,
@@ -97,6 +97,7 @@ class PokemonTables
 public:
     bool exp_groups_loaded;
     bool gender_ratios_loaded;
+    bool jpn_names_loaded;
     bool num_abilities_loaded;
     bool first_moves_loaded;
     bool power_points_loaded;
@@ -110,6 +111,7 @@ public:
 
     u8 EXP_GROUPS[POKEMON_ARRAY_SIZE];
     u8 GENDER_RATIO[POKEMON_ARRAY_SIZE];
+    u16 JPN_NAMES[POKEMON_ARRAY_SIZE][6];
     bool NUM_ABILITIES[POKEMON_ARRAY_SIZE];
     byte FIRST_MOVES[POKEMON_ARRAY_SIZE];
     u8 POWER_POINTS[252];
@@ -121,6 +123,7 @@ public:
 
     void load_exp_groups();
     void load_gender_ratios();
+    void load_jpn_names();
     void load_num_abilities();
     void load_first_moves();
     void load_power_points();
@@ -131,6 +134,7 @@ public:
 
     u32 get_max_exp(int index_num);
     u8 get_gender_threshold(int index_num, bool is_gen_3);
+    bool get_japanese_name(int index_num, u16 out[]);
     bool get_num_abilities(int index_num);
     bool can_learn_move(int pkmn_index, int move_index);
     byte get_earliest_move(int index_num);
@@ -142,5 +146,25 @@ public:
  */
 void load_localized_charset(u16 *output_char_array, byte gen, Language lang);
 byte get_char_from_charset(const u16 *charset, u16 input_char);
+
+/**
+ * @brief This function converts a gen 3 string to an UTF-16 string, using the provided charset. 
+ * The output array should be big enough to hold the resulting UTF-16 string.
+ */
+u16 convert_gen_3_char_to_utf16(const u16 *charset, const u8 input);
+
+/**
+ * @brief This function converts a utf-16 char to a an UTF-8 char.
+ * 
+ * We don't support surrogate pairs, so the output char will always be <= 3 bytes long.
+ */
+u32 convert_utf16_to_utf8_char(u16 ch, u8 *out);
+
+/**
+ * @brief This function converts an UTF-8 char to an UTF-16 char.
+ * 
+ * We don't support surrogate pairs though. So the output will always be just 2 bytes.
+ */
+u32 convert_utf8_to_utf16_char(const u8 *utf8Char, u16 &outUtf16Char);
 
 #endif

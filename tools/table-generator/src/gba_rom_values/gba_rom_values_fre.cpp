@@ -1,12 +1,14 @@
 #include "gba_rom_values/gba_rom_values.h"
 
 const struct ROM_DATA rom_data_values_fre[] = {
-    { // FRE_RUBY_v0
+    {
+        // FRE_RUBY_v0
         .is_valid = true,
 
         .gamecode = RUBY_ID,
         .version = VERS_1_0,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x803db6c, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x809127c,
@@ -18,13 +20,12 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .loc_voicegroup = 0x84492c0,
         .loc_sPicTable_NPC = 0x83753ec,
 
-        // TODO
-        .loc_gMonFrontPicTable = 0,
-        .loc_gMonPaletteTable = 0,
-        .loc_gMonShinyPaletteTable = 0,
-        .loc_gMonIconTable = 0,
-        .loc_gMonIconPaletteIndices = 0,
-        .loc_gMonIconPalettes = 0,
+        .loc_gMonFrontPicTable = 0x081F075C,
+        .loc_gMonPaletteTable = 0x081F29BC,
+        .loc_gMonShinyPaletteTable = 0x081F377C,
+        .loc_gMonIconTable = 0x083C3704,
+        .loc_gMonIconPaletteIndices = 0x083C3DE4,
+        .loc_gMonIconPalettes = 0x08E968FC,
 
         // The following should be consistant across languages and revisions.
         .loc_gSaveBlock1 = 0x02025734,
@@ -62,12 +63,14 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .old_npc_id = 1,
         .loc_gSaveBlock1PTR = 0 // TODO: Only used for old script, can be removed later
     },
-    { // FRE_SAPPHIRE_v0
+    {
+        // FRE_SAPPHIRE_v0
         .is_valid = true,
 
         .gamecode = SAPPHIRE_ID,
         .version = VERS_1_0,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x803db6c, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x809127c,
@@ -79,13 +82,12 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .loc_voicegroup = 0x8448df0,
         .loc_sPicTable_NPC = 0x837537c,
 
-        // TODO
-        .loc_gMonFrontPicTable = 0,
-        .loc_gMonPaletteTable = 0,
-        .loc_gMonShinyPaletteTable = 0,
-        .loc_gMonIconTable = 0,
-        .loc_gMonIconPaletteIndices = 0,
-        .loc_gMonIconPalettes = 0,
+        .loc_gMonFrontPicTable = 0x081F06EC,
+        .loc_gMonPaletteTable = 0x081F294C,
+        .loc_gMonShinyPaletteTable = 0x081F370C,
+        .loc_gMonIconTable = 0x083C3234,
+        .loc_gMonIconPaletteIndices = 0x083C3914,
+        .loc_gMonIconPalettes = 0x08E968FC,
 
         // The following should be consistant across languages and revisions.
         .loc_gSaveBlock1 = 0x02025734,
@@ -123,12 +125,14 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .old_npc_id = 1,
         .loc_gSaveBlock1PTR = 0 // TODO: Only used for old script, can be removed later
     },
-    { // FRE_RUBY_v1
+    {
+        // FRE_RUBY_v1
         .is_valid = true,
 
         .gamecode = RUBY_ID,
         .version = VERS_1_1,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x803db6c, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x809127c,
@@ -140,13 +144,12 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .loc_voicegroup = 0x84492c0,
         .loc_sPicTable_NPC = 0x83753ec,
 
-        // TODO
-        .loc_gMonFrontPicTable = 0,
-        .loc_gMonPaletteTable = 0,
-        .loc_gMonShinyPaletteTable = 0,
-        .loc_gMonIconTable = 0,
-        .loc_gMonIconPaletteIndices = 0,
-        .loc_gMonIconPalettes = 0,
+        .loc_gMonFrontPicTable = 0x081F075C,
+        .loc_gMonPaletteTable = 0x081F29BC,
+        .loc_gMonShinyPaletteTable = 0x081F377C,
+        .loc_gMonIconTable = 0x083C3704,
+        .loc_gMonIconPaletteIndices = 0x083C3DE4,
+        .loc_gMonIconPalettes = 0x08E968FC,
 
         // The following should be consistant across languages and revisions.
         .loc_gSaveBlock1 = 0x02025734,
@@ -184,12 +187,14 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .old_npc_id = 1,
         .loc_gSaveBlock1PTR = 0 // TODO: Only used for old script, can be removed later
     },
-    { // FRE_SAPPHIRE_v1
+    {
+        // FRE_SAPPHIRE_v1
         .is_valid = true,
 
         .gamecode = SAPPHIRE_ID,
         .version = VERS_1_1,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x803db6c, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x809127c,
@@ -201,13 +206,12 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .loc_voicegroup = 0x8448df0,
         .loc_sPicTable_NPC = 0x837537c,
 
-        // TODO
-        .loc_gMonFrontPicTable = 0,
-        .loc_gMonPaletteTable = 0,
-        .loc_gMonShinyPaletteTable = 0,
-        .loc_gMonIconTable = 0,
-        .loc_gMonIconPaletteIndices = 0,
-        .loc_gMonIconPalettes = 0,
+        .loc_gMonFrontPicTable = 0x081F06EC,
+        .loc_gMonPaletteTable = 0x081F294C,
+        .loc_gMonShinyPaletteTable = 0x081F370C,
+        .loc_gMonIconTable = 0x083C3234,
+        .loc_gMonIconPaletteIndices = 0x083C3914,
+        .loc_gMonIconPalettes = 0x08E968FC,
 
         // The following should be consistant across languages and revisions.
         .loc_gSaveBlock1 = 0x02025734,
@@ -245,12 +249,14 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .old_npc_id = 1,
         .loc_gSaveBlock1PTR = 0 // TODO: Only used for old script, can be removed later
     },
-    { // FRE_FIRERED_v0
+    {
+        // FRE_FIRERED_v0
         .is_valid = true,
 
         .gamecode = FIRERED_ID,
         .version = VERS_1_0,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x8040a68, // Known as "SendMonToPC"
         .loc_getSetPokedexFlag = 0x8089018,
@@ -262,13 +268,12 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .loc_voicegroup = 0x848e940,
         .loc_sPicTable_NPC = 0x839aea8,
 
-        // TODO
-        .loc_gMonFrontPicTable = 0,
-        .loc_gMonPaletteTable = 0,
-        .loc_gMonShinyPaletteTable = 0,
-        .loc_gMonIconTable = 0,
-        .loc_gMonIconPaletteIndices = 0,
-        .loc_gMonIconPalettes = 0,
+        .loc_gMonFrontPicTable = 0x0822F4B8,
+        .loc_gMonPaletteTable = 0x08231718,
+        .loc_gMonShinyPaletteTable = 0x082324D8,
+        .loc_gMonIconTable = 0x083CD5E0,
+        .loc_gMonIconPaletteIndices = 0x083CDCC0,
+        .loc_gMonIconPalettes = 0x083CD580,
 
         // The following should be consistant across languages and revisions.
         .loc_gSaveBlock1 = 0,
@@ -307,12 +312,14 @@ const struct ROM_DATA rom_data_values_fre[] = {
 
         .loc_gSaveBlock1PTR = 0x03005008, // TODO: Only used for old script, can be removed later
     },
-    { // FRE_LEAFGREEN_v0
+    {
+        // FRE_LEAFGREEN_v0
         .is_valid = true,
 
         .gamecode = LEAFGREEN_ID,
         .version = VERS_1_0,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x8040a68,
         .loc_getSetPokedexFlag = 0x8088fec,
@@ -324,13 +331,12 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .loc_voicegroup = 0x848d668,
         .loc_sPicTable_NPC = 0x839ae88,
 
-        // TODO
-        .loc_gMonFrontPicTable = 0,
-        .loc_gMonPaletteTable = 0,
-        .loc_gMonShinyPaletteTable = 0,
-        .loc_gMonIconTable = 0,
-        .loc_gMonIconPaletteIndices = 0,
-        .loc_gMonIconPalettes = 0,
+        .loc_gMonFrontPicTable = 0x0822F494,
+        .loc_gMonPaletteTable = 0x082316F4,
+        .loc_gMonShinyPaletteTable = 0x082324B4,
+        .loc_gMonIconTable = 0x083CD41C,
+        .loc_gMonIconPaletteIndices = 0x083CDAFC,
+        .loc_gMonIconPalettes = 0x083CD3BC,
 
         // The following should be consistant across languages and revisions.
         .loc_gSaveBlock1 = 0,
@@ -369,12 +375,14 @@ const struct ROM_DATA rom_data_values_fre[] = {
 
         .loc_gSaveBlock1PTR = 0x03005008, // TODO: Only used for old script, can be removed later
     },
-    { // FRE_EMERALD_v0
+    {
+        // FRE_EMERALD_v0
         .is_valid = true,
 
         .gamecode = EMERALD_ID,
         .version = VERS_1_0,
         .language = LANG_FRE,
+        .entrypoint = 0xEA00007F,
 
         .loc_copyMonToPC = 0x806b490,
         .loc_getSetPokedexFlag = 0x80c0448,
@@ -386,13 +394,12 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .loc_voicegroup = 0x868a990,
         .loc_sPicTable_NPC = 0x850b2f0,
 
-        // TODO
-        .loc_gMonFrontPicTable = 0,
-        .loc_gMonPaletteTable = 0,
-        .loc_gMonShinyPaletteTable = 0,
-        .loc_gMonIconTable = 0,
-        .loc_gMonIconPaletteIndices = 0,
-        .loc_gMonIconPalettes = 0,
+        .loc_gMonFrontPicTable = 0x08308F48,
+        .loc_gMonPaletteTable = 0x0830B1A8,
+        .loc_gMonShinyPaletteTable = 0x0830BF68,
+        .loc_gMonIconTable = 0x08580020,
+        .loc_gMonIconPaletteIndices = 0x08580700,
+        .loc_gMonIconPalettes = 0x08DDE39C,
 
         // The following should be consistant across languages and revisions.
         .loc_gSaveBlock1 = 0,
@@ -430,7 +437,6 @@ const struct ROM_DATA rom_data_values_fre[] = {
         .old_npc_id = 1,
 
         .loc_gSaveBlock1PTR = 0x03005D8C, // TODO: Only used for old script, can be removed later
-    }
-};
+    }};
 
 const u16 rom_data_values_fre_size = static_cast<u16>(sizeof(rom_data_values_fre) / sizeof(struct ROM_DATA));

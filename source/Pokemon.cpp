@@ -10,13 +10,101 @@ u32 Pokemon::getSpeciesIndexNumber()
     return 0;
 }
 
-u32 Pokemon::getVar(DataVarInfo dataVar)
+UnownLetter Pokemon::getUnownLetter()
+{
+    return NO_LETTER;
+}
+
+bool Pokemon::getIsShiny()
+{
+    return false;
+}
+
+bool Pokemon::getIsHatchable()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon != DITTO && 
+        mon != ARTICUNO &&
+        mon != MOLTRES &&
+        mon != ZAPDOS &&
+        mon != MEWTWO &&
+        mon != MEW &&
+        mon != UNOWN &&
+        mon != RAIKOU &&
+        mon != ENTEI &&
+        mon != SUICUNE &&
+        mon != LUGIA &&
+        mon != HO_OH &&
+        mon != CELEBI
+    );
+}
+
+bool Pokemon::getIsMythical()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == MEW ||
+        mon == CELEBI
+    );
+}
+
+bool Pokemon::getReversesPID()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == MEW ||
+        mon == UNOWN ||
+        mon == CELEBI
+    );
+}
+
+bool Pokemon::getIsRoamer()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == RAIKOU ||
+        mon == ENTEI ||
+        mon == SUICUNE
+    );
+}
+
+bool Pokemon::getIsNido()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == NIDORAN_F ||
+        mon == NIDORINA ||
+        mon == NIDOQUEEN ||
+        mon == NIDORAN_M ||
+        mon == NIDORINO ||
+        mon == NIDOKING
+        );
+}
+
+bool Pokemon::getIsWildEncounter()
+{
+    Species mon = (Species)getSpeciesIndexNumber();
+    return (
+        mon == DITTO ||
+        mon == UNOWN
+    );
+}
+
+u32 Pokemon::getVar(const DataVarInfo& dataVar)
 {
     return getVar(dataVar, 0);
 }
 
-u32 Pokemon::getVar(DataVarInfo dataVar, int extraByteOffset)
+u32 Pokemon::getVar(const DataVarInfo& dataVar, int extraByteOffset)
 {
+    // This bounds check can be triggered in a valid scenario:
+    // if the pokémon is a party pokemon, it has more data than if it's stored in the box.
+    if(dataVar.byteOffset >= dataArraySize)
+    {
+        return 0;
+    }
+
     u32 out = 0;
     if (dataVar.dataLength < 8)
     { // is less than a byte, do bitwise stuff on a single byte
@@ -54,12 +142,12 @@ u32 Pokemon::getVar(DataVarInfo dataVar, int extraByteOffset)
     return out;
 }
 
-bool Pokemon::setVar(DataVarInfo dataVar, u32 newValue)
+bool Pokemon::setVar(const DataVarInfo& dataVar, u32 newValue)
 {
     return setVar(dataVar, 0, newValue);
 }
 
-bool Pokemon::setVar(DataVarInfo dataVar, int extraByteOffset, u32 newValue)
+bool Pokemon::setVar(const DataVarInfo& dataVar, int extraByteOffset, u32 newValue)
 {
     if (dataVar.dataLength < 8)
     { // is less than a byte, do bitwise stuff on a single byte
