@@ -3,12 +3,13 @@
 
 #include <cstddef>
 
-#include "Pokemon.h"
 #include "Gen3Pokemon.h"
+#include "Pokemon.h"
 
-class GBPokemon : public Pokemon // The class for gen 1 and 2 Pokemon, since they share some conversion functions
+class GBPokemon : public Pokemon // The class for gen 1 and 2 Pokemon, since
+                                 // they share some conversion functions
 {
-protected:
+  protected:
     GBPokemon();
     void updateValidity();
     // These store the data bytes
@@ -20,31 +21,27 @@ protected:
     static const DataVarInfo
         // All of the data info variables
         speciesIndexNumber[2],
-        level[2],
-        moveOne[2], moveTwo[2], moveThree[2], moveFour[2],
-        trainerID[2],
-        expPoints[2],
-        hpStatExp[2], atkStatExp[2], defStatExp[2], speStatExp[2], spcStatExp[2],
-        atkDV[2], defDV[2], speDV[2], spcDV[2],
-        ppUpNumMoveOne[2], ppUpNumMoveTwo[2], ppUpNumMoveThree[2], ppUpNumMoveFour[2],
-        ppNumTotalMoveOne[2], ppNumTotalMoveTwo[2], ppNumTotalMoveThree[2], ppNumTotalMoveFour[2];
+        level[2], moveOne[2], moveTwo[2], moveThree[2], moveFour[2], trainerID[2], expPoints[2],
+        hpStatExp[2], atkStatExp[2], defStatExp[2], speStatExp[2], spcStatExp[2], atkDV[2],
+        defDV[2], speDV[2], spcDV[2], ppUpNumMoveOne[2], ppUpNumMoveTwo[2], ppUpNumMoveThree[2],
+        ppUpNumMoveFour[2], ppNumTotalMoveOne[2], ppNumTotalMoveTwo[2], ppNumTotalMoveThree[2],
+        ppNumTotalMoveFour[2];
 
     static const DataVarInfo
         // and the convenient arrays of some of the variable groups:
         *moves[4],
-        *statExps[5],
-        *DVs[5],
-        *PPUpNums[4],
-        *PPUpTotals[4];
+        *statExps[5], *DVs[5], *PPUpNums[4], *PPUpTotals[4];
 
-// This is used to easily print out a Pokemon, when using a standard C++ terminal
+// This is used to easily print out a Pokemon, when using a standard C++
+// terminal
 #if ON_GBA
 #else
     std::string parentPrint(PokemonTables *pokeTable);
 #endif
 
-public:
-    void loadData(Language nLang, const byte nDataArray[], const byte nNicknameArray[], const byte nOTArray[], byte nExternalIndexNum);
+  public:
+    void loadData(Language nLang, const byte nDataArray[], const byte nNicknameArray[],
+        const byte nOTArray[], byte nExternalIndexNum);
 
     /**
      * @brief This overload allows you to load a Pokémon from a PK1 or PK2 file.
@@ -66,12 +63,25 @@ public:
     u32 getPPUpNum(int moveIndex) { return getVar(PPUpNums[moveIndex][generation - 1]); }
     u32 getPPTotal(int moveIndex) { return getVar(PPUpTotals[moveIndex][generation - 1]); }
 
-    bool setMove(int moveIndex, byte newVal) { return setVar(moves[moveIndex][generation - 1], newVal); }
-    bool setStatExp(Stat currStat, byte newVal) { return setVar(statExps[currStat][generation - 1], newVal); }
-    bool setPPUpNum(int moveIndex, byte newVal) { return setVar(PPUpNums[moveIndex][generation - 1], newVal); }
-    bool setPPTotal(int moveIndex, byte newVal) { return setVar(PPUpTotals[moveIndex][generation - 1], newVal); }
+    bool setMove(int moveIndex, byte newVal)
+    {
+        return setVar(moves[moveIndex][generation - 1], newVal);
+    }
+    bool setStatExp(Stat currStat, byte newVal)
+    {
+        return setVar(statExps[currStat][generation - 1], newVal);
+    }
+    bool setPPUpNum(int moveIndex, byte newVal)
+    {
+        return setVar(PPUpNums[moveIndex][generation - 1], newVal);
+    }
+    bool setPPTotal(int moveIndex, byte newVal)
+    {
+        return setVar(PPUpTotals[moveIndex][generation - 1], newVal);
+    }
 
-    // These are all replaced in the child classes, but give a default value or do nothing here
+    // These are all replaced in the child classes, but give a default value or
+    // do nothing here
 
     // ---- Gen 1
     virtual u32 getSpeciesIndexNumber() { return getVar(*speciesIndexNumber); }
@@ -87,8 +97,11 @@ public:
     virtual bool setType(int typeIndex, Gen1Types newVal) { return false; }
 
     // ---- Gen 2
-    virtual u32 getHeldItem() { return 0; }    // no item
-    virtual u32 getFriendship() { return 70; } // default friendship - make this different for Pikachu in Yellow???
+    virtual u32 getHeldItem() { return 0; } // no item
+    virtual u32 getFriendship()
+    {
+        return 70;
+    } // default friendship - make this different for Pikachu in Yellow???
     virtual u32 getPokerusStrain() { return 0; }
     virtual u32 getPokerusDaysRemaining() { return 0; }
     virtual u32 getCaughtDataTime() { return 0; }
@@ -96,7 +109,10 @@ public:
     virtual u32 getCaughtDataGender() { return 0; }
     virtual u32 getCaughtDataLocation() { return 0; }
 
-    virtual bool setHeldItem(byte newVal) { return false; } // This could *technically* be seen as setting the catch rate but...
+    virtual bool setHeldItem(byte newVal)
+    {
+        return false;
+    } // This could *technically* be seen as setting the catch rate but...
     virtual bool setFriendship(byte newVal) { return false; }
     virtual bool setPokerusStrain(byte newVal) { return false; }
     virtual bool setPokerusDaysRemaining(byte newVal) { return false; }
@@ -119,12 +135,14 @@ public:
     bool getIsShiny() override;
     bool externalConvertNickname(PokemonTables *pokeTable, byte outputArray[]);
     u32 getIndividualDataChecksum();
-    
+
     // And this is for all the conversion stuff
-    bool convertToGen3(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method, bool sanitizeMythicals=true);
+    bool convertToGen3(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method,
+        bool sanitizeMythicals = true);
     bool loadEvent(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method);
 
-    bool generatePersonalityValueAndIVs(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method, bool isEvent);
+    bool generatePersonalityValueAndIVs(
+        PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method, bool isEvent);
     bool convertTrainerID(Gen3Pokemon *newPkmn);
     bool convertNickname(PokemonTables *pokeTable, Gen3Pokemon *newPkmn);
     bool convertLanguage(Gen3Pokemon *newPkmn);
@@ -152,7 +170,8 @@ public:
     bool setRequestedLetter(Gen3Pokemon *newPkmn);
     bool setRequestedNature(Gen3Pokemon *newPkmn, ConversionMethod method);
     bool setRequestedGender(PokemonTables *pokeTable, Gen3Pokemon *newPkmn);
-    bool setRequestedAbility(PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method);
+    bool setRequestedAbility(
+        PokemonTables *pokeTable, Gen3Pokemon *newPkmn, ConversionMethod method);
     bool setRequestedSize(Gen3Pokemon *newPkmn, ConversionMethod method);
 };
 

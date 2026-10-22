@@ -56,6 +56,17 @@ all:
 
 all_internal: dirs $(TABLES_STAMP) bin2s_tool lib
 
+.PHONY: format check-format
+format: FORMAT_FLAGS := -i
+check-format: FORMAT_FLAGS := --dry-run --Werror
+# Only original source/header folders; lib and build contain generated copies.
+format check-format:
+	@find source include tests/src tests/include tools/table-generator/src tools/table-generator/include \
+		-type d \( -name libraries -o -name build \) -prune -o \
+		-type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.cxx' \
+		-o -name '*.h' -o -name '*.hh' -o -name '*.hpp' -o -name '*.hxx' \) -print0 | \
+		xargs -0 -r clang-format-19 --style=file --fallback-style=none $(FORMAT_FLAGS)
+
 lib: $(TABLES_STAMP) bin2s_tool
 	@$(MAKE) -C build -f $(MKFILE_DIR)Makefile
 	cp -u build/*.h lib/include/

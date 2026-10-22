@@ -20,7 +20,6 @@
 #define ACCESS_POKEDEX false
 #endif
 
-
 #endif
 
 /* TODO:

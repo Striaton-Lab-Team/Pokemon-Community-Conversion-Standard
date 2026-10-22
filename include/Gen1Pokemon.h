@@ -5,19 +5,21 @@
 
 class Gen1Pokemon : public GBPokemon // The class for gen 1 Pokemon
 {
-public:
+  public:
     Gen1Pokemon(Language nLang);
     byte dataArray[33];
 
     /**
-     * @brief This function gets the exact raw species index number as stored in the data (without conversion using gen_1_index_array)
+     * @brief This function gets the exact raw species index number as stored in
+     * the data (without conversion using gen_1_index_array)
      */
     u32 getRawSpeciesIndexNumber();
 
     /**
-     * @brief This function gets the species index number, after getting converted with gen_1_index_array.
-     * This conversion is necessary because the actual species index numbers used in the data doesn't follow
-     * the canon species index in gen I.
+     * @brief This function gets the species index number, after getting
+     * converted with gen_1_index_array. This conversion is necessary because
+     * the actual species index numbers used in the data doesn't follow the
+     * canon species index in gen I.
      */
     u32 getSpeciesIndexNumber();
     u32 getCurrentHP() { return getVar(g1_currentHP); }
@@ -31,14 +33,11 @@ public:
     bool setCatchRate(byte newVal) { return setVar(g1_catchRate, newVal); }
     bool setType(int typeIndex, Gen1Types newVal) { return setVar(*g1_types[typeIndex], newVal); }
 
-protected:
+  protected:
     static const DataVarInfo
         // Gen 1 specific data
         g1_currentHP,
-        g1_statusCondition,
-        g1_typeOne, g1_typeTwo,
-        g1_catchRate,
-        *g1_types[2];
+        g1_statusCondition, g1_typeOne, g1_typeTwo, g1_catchRate, *g1_types[2];
 
 #if ON_GBA
 #else

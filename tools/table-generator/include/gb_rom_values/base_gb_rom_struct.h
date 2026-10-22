@@ -44,21 +44,23 @@ extern "C"
 
 #define GB_TILE_WIDTH 20
 
-// TODO? : Since we moved payload_builder into data-generator, we no longer need most of the fields of GB_ROM in our PTGB rom.
-// It might be better to split it up into a struct that contains everything for data-generator and a separate one that gets
-// included into the ptgb rom, which only includes whatever PTGB needs at runtime. (which is probably a fraction of the data)
-// However, right now the compressed gb_rom_values_eng file is only 353 bytes and the gb_rom_values_fre is only 351 bytes.
-// Therefore we'd save at most about 0,5 KB if we do this optimization. So it might not be worth it right now.
-// If we expand the data at some point, however, it might be!
+// TODO? : Since we moved payload_builder into data-generator, we no longer need most of the fields
+// of GB_ROM in our PTGB rom. It might be better to split it up into a struct that contains
+// everything for data-generator and a separate one that gets included into the ptgb rom, which only
+// includes whatever PTGB needs at runtime. (which is probably a fraction of the data) However,
+// right now the compressed gb_rom_values_eng file is only 353 bytes and the gb_rom_values_fre is
+// only 351 bytes. Therefore we'd save at most about 0,5 KB if we do this optimization. So it might
+// not be worth it right now. If we expand the data at some point, however, it might be!
 
 // WARNING: We must be explicit in the type declarations of the struct members here.
 // After all: data-generator runs on x86 and the structs will be read by the GBA's ARM processor.
-// So we must ensure the sizes of the struct members, as well as padding, remains consistent across platforms.
-// So please make sure to use data types which are explicit in their size. (such as uint32_t, uint8_t, etc.)
-// Because the regular "int", "bool", "char" etc are platform-dependent in size.
+// So we must ensure the sizes of the struct members, as well as padding, remains consistent across
+// platforms. So please make sure to use data types which are explicit in their size. (such as
+// uint32_t, uint8_t, etc.) Because the regular "int", "bool", "char" etc are platform-dependent in
+// size.
 struct GB_ROM
 {
-public:
+  public:
     int32_t language;
     int32_t version;
     int32_t generation;
@@ -97,7 +99,8 @@ public:
     u32 wEnemyMonSpecies;      // location of wEnemyMonSpecies in RAM
 
     u32 wSerialEnemyMonsPatchList;                // location of wSerialEnemyMonsPatchList in RAM
-    u32 wSerialOtherGameboyRandomNumberListBlock; // location of wSerialOtherGameboyRandomNumberListBlock in RAM
+    u32 wSerialOtherGameboyRandomNumberListBlock; // location of
+                                                  // wSerialOtherGameboyRandomNumberListBlock in RAM
     u32 hSerialConnectionStatus;                  // location of hSerialConnectionStatus in RAM
 
     u16 transferStringLocation; // location in VRAM to start writing the transfer string to

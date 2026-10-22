@@ -5,10 +5,10 @@
 
 #if ON_GBA
 #else
+#include <cstdint>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
-#include <cstdint>
 #endif
 
 #if USE_CPP_RAND
@@ -54,7 +54,7 @@ inline u32 fnv1a_hash(unsigned char *data, size_t length)
 
 class Pokemon // The base Pokemon class
 {
-public:
+  public:
     Pokemon();
     virtual ~Pokemon() {};
     virtual u32 getSpeciesIndexNumber();
@@ -89,14 +89,14 @@ public:
     int generation = 0;
     bool isValid;
 
-protected:
+  protected:
     bool isBigEndian;
 
-    u32 getVar(const DataVarInfo& dataVar);
-    u32 getVar(const DataVarInfo& dataVar, int extraByteOffset);
+    u32 getVar(const DataVarInfo &dataVar);
+    u32 getVar(const DataVarInfo &dataVar, int extraByteOffset);
 
-    bool setVar(const DataVarInfo& dataVar, u32 newValue);
-    bool setVar(const DataVarInfo& dataVar, int extraByteOffset, u32 newValue);
+    bool setVar(const DataVarInfo &dataVar, u32 newValue);
+    bool setVar(const DataVarInfo &dataVar, int extraByteOffset, u32 newValue);
 };
 
 #endif

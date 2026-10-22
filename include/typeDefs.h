@@ -650,7 +650,7 @@ enum Item
 };
 
 enum MetLocation
-    {
+{
     // RS
     LITTLEROOT_TOWN,
     OLDALE_TOWN,
@@ -710,7 +710,7 @@ enum MetLocation
     GRANITE_CAVE,
     MT_CHIMNEY,
     HOENN_SAFARI_ZONE,
-    BATTLE_TOWER, // RS
+    BATTLE_TOWER,                   // RS
     BATTLE_FRONTIER = BATTLE_TOWER, // E
     PETALBURG_WOODS,
     RUSTURF_TUNNEL,
@@ -852,9 +852,9 @@ enum MetLocation
     RIXY_CHAMBER,
     VIAPOIS_CHAMBER,
     EMBER_SPA,
-    CELADON_DEPT, // FRLG
+    CELADON_DEPT,                // FRLG
     SPECIAL_AREA = CELADON_DEPT, // E
-    // Emerald
+                                 // Emerald
     AQUA_HIDEOUT_EMERALD,
     MAGMA_HIDEOUT_EMERALD,
     MIRAGE_TOWER,
@@ -953,7 +953,8 @@ enum class Endianness
 
 enum ConversionMethod
 {
-    ORIGINAL = -1, // Original should NOT be refrenced in the conversion checks, it just represents the default.
+    ORIGINAL = -1, // Original should NOT be refrenced in the conversion checks,
+                   // it just represents the default.
     FAITHFUL,
     LEGAL,
     VIRTUAL,
@@ -961,7 +962,8 @@ enum ConversionMethod
 
 enum RNGMethod
 {
-    // These are ordered in wild encounter rarity. Really should only be a problem for Unown.
+    // These are ordered in wild encounter rarity. Really should only be a
+    // problem for Unown.
     AB_DE,
     ABC_E,
     ABCD,

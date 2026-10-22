@@ -1,8 +1,8 @@
 #ifndef POKEMON_DATA_H
 #define POKEMON_DATA_H
 
-#include "typeDefs.h"
 #include "pccs_settings.h"
+#include "typeDefs.h"
 
 #define med_fast_max (u32)1000000
 // Slightly Fast goes unused
@@ -56,45 +56,54 @@
 // these arrays are too small to compress
 extern const u32 EXP_MAXIMUMS[6];
 extern const u8 GENDER_THRESHOLDS[2][8];
-// the next arrays don't compress well at all. Not worth the decompression overhead.
+// the next arrays don't compress well at all. Not worth the decompression
+// overhead.
 extern const byte gen_1_index_array[191];
 extern const u8 EVOLUTIONS[POKEMON_ARRAY_SIZE];
 
 // Unfortunately we can't compress this 8 KB MOVESETS array.
 // I mean, we physically can, but decompressing it means storing it in IWRAM,
-// at a moment (during convert_to_gen_three()) at which we are using a LOT of IWRAM already.
-// By keeping it uncompressed, it gets stored in EWRAM, where it won't hinder us.
-// But it does mean that it still takes up 8 KB in the rom.
-// Just for reference: when compressing it with ZX0 AND only storing the "changed" bits for PKMN
-// evolutions in relation to their base forms, we could bring the size down to 4641 bytes.
-// But alas, the IWRAM consumption at a critical point in time made this approach unviable.
+// at a moment (during convert_to_gen_three()) at which we are using a LOT of
+// IWRAM already. By keeping it uncompressed, it gets stored in EWRAM, where it
+// won't hinder us. But it does mean that it still takes up 8 KB in the rom.
+// Just for reference: when compressing it with ZX0 AND only storing the
+// "changed" bits for PKMN evolutions in relation to their base forms, we could
+// bring the size down to 4641 bytes. But alas, the IWRAM consumption at a
+// critical point in time made this approach unviable.
 // TODO: we might be able to load similar data from the game cartridges.
-// However, it turns out the data is different between the R/S/E and FR/LG games.
-// So we would have to store "patches"/differences if we go this route.
-// It also means we'd have to figure out rom offsets for every single gen III game variant/localization.
+// However, it turns out the data is different between the R/S/E and FR/LG
+// games. So we would have to store "patches"/differences if we go this route.
+// It also means we'd have to figure out rom offsets for every single gen III
+// game variant/localization.
 extern const byte MOVESETS[POKEMON_ARRAY_SIZE][32];
 
 /**
  * Okay, here's the thing: to reduce the rom size, we compressed a bunch of data
- * Among this data are various data tables that were previously just stored as const arrays.
+ * Among this data are various data tables that were previously just stored as
+ * const arrays.
  *
  * But, during the mystery_gift_builder/mystery_gift_injector execution,
- * these data tables are used intensely, because you're not using them for single pokémon, but rather for boxes of pokémon.
+ * these data tables are used intensely, because you're not using them for
+ * single pokémon, but rather for boxes of pokémon.
  *
- * Decompression is not cheap, so we can't afford to decompress the tables again and again for every pokémon we deal with
- * during this flow.
+ * Decompression is not cheap, so we can't afford to decompress the tables again
+ * and again for every pokémon we deal with during this flow.
  *
- * This is where this class comes in. It is basically a holder of these tables. The idea is to pass it along with the mystery_gift_builder
- * and have it lazy decompress the tables AND charsets it needs. This way when we are dealing with multiple pokémon, we are not decompressing
- * the same data every time and thereby make performance suffer.
+ * This is where this class comes in. It is basically a holder of these tables.
+ * The idea is to pass it along with the mystery_gift_builder and have it lazy
+ * decompress the tables AND charsets it needs. This way when we are dealing
+ * with multiple pokémon, we are not decompressing the same data every time and
+ * thereby make performance suffer.
  *
- * It DOES have a significant IWRAM cost though. The intention is to just allocate this struct on the stack.
- * As far as I can tell, our stack is not really restricted at all. It just fills up the IWRAM as needed. So we need to be careful not to
- * overwrite/corrupt any code or data we specifically tagged to be stored in IWRAM.
+ * It DOES have a significant IWRAM cost though. The intention is to just
+ * allocate this struct on the stack. As far as I can tell, our stack is not
+ * really restricted at all. It just fills up the IWRAM as needed. So we need to
+ * be careful not to overwrite/corrupt any code or data we specifically tagged
+ * to be stored in IWRAM.
  */
 class PokemonTables
 {
-public:
+  public:
     bool exp_groups_loaded;
     bool gender_ratios_loaded;
     bool jpn_names_loaded;
@@ -103,8 +112,8 @@ public:
     bool power_points_loaded;
     bool event_pkmn_loaded;
     bool types_loaded;
-    // a number representing the unique combination of gen 1/2 and the specific language
-    // 0 means not loaded
+    // a number representing the unique combination of gen 1/2 and the specific
+    // language 0 means not loaded
     u8 input_charset_type;
     // 0 means not loaded, 1=JPN, 2=Intern
     u8 gen3_charset_type;
@@ -148,22 +157,25 @@ void load_localized_charset(u16 *output_char_array, byte gen, Language lang);
 byte get_char_from_charset(const u16 *charset, u16 input_char);
 
 /**
- * @brief This function converts a gen 3 string to an UTF-16 string, using the provided charset. 
- * The output array should be big enough to hold the resulting UTF-16 string.
+ * @brief This function converts a gen 3 string to an UTF-16 string, using the
+ * provided charset. The output array should be big enough to hold the resulting
+ * UTF-16 string.
  */
 u16 convert_gen_3_char_to_utf16(const u16 *charset, const u8 input);
 
 /**
  * @brief This function converts a utf-16 char to a an UTF-8 char.
- * 
- * We don't support surrogate pairs, so the output char will always be <= 3 bytes long.
+ *
+ * We don't support surrogate pairs, so the output char will always be <= 3
+ * bytes long.
  */
 u32 convert_utf16_to_utf8_char(u16 ch, u8 *out);
 
 /**
  * @brief This function converts an UTF-8 char to an UTF-16 char.
- * 
- * We don't support surrogate pairs though. So the output will always be just 2 bytes.
+ *
+ * We don't support surrogate pairs though. So the output will always be just 2
+ * bytes.
  */
 u32 convert_utf8_to_utf16_char(const u8 *utf8Char, u16 &outUtf16Char);
 

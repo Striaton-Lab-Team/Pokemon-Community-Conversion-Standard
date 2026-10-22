@@ -3,15 +3,11 @@
 
 #if ON_GBA
 #include "global_frame_controller.h"
-#include "text_engine.h"
 #include "ptgb_save_data_manager.h"
+#include "text_engine.h"
 #endif
 
-PokeBox::PokeBox()
-    : boxStorage()
-    , nullMon(new Pokemon())
-    , currIndex(0)
-    , stabilize_mythical(false)
+PokeBox::PokeBox() : boxStorage(), nullMon(new Pokemon()), currIndex(0), stabilize_mythical(false)
 {
 }
 
@@ -155,32 +151,32 @@ bool PokeBox::getContainsMythical()
     bool out = false;
     for (int i = 0; i < getNumInBox(); i++)
     {
-        out |= (getPokemon(i)->getSpeciesIndexNumber() == MEW || getPokemon(i)->getSpeciesIndexNumber() == CELEBI);
+        out |= (getPokemon(i)->getSpeciesIndexNumber() == MEW ||
+                getPokemon(i)->getSpeciesIndexNumber() == CELEBI);
     }
     return out;
 }
 
 bool PokeBox::getContainsInvalid()
 {
-	bool out = false;
-	for (int i = 0; i < getNumInBox(); i++)
-	{
+    bool out = false;
+    for (int i = 0; i < getNumInBox(); i++)
+    {
 
-		out |= !getGBPokemon(i)->isValid;
-	}
-	return out;
+        out |= !getGBPokemon(i)->isValid;
+    }
+    return out;
 }
 
 bool PokeBox::getContainsMissingNo()
 {
-	bool out = false;
-	for (int i = 0; i < getNumInBox(); i++)
-	{
+    bool out = false;
+    for (int i = 0; i < getNumInBox(); i++)
+    {
 
-		out |= 
-        getPokemon(i)->getSpeciesIndexNumber() == MISSINGNO;
-	}
-	return out;
+        out |= getPokemon(i)->getSpeciesIndexNumber() == MISSINGNO;
+    }
+    return out;
 }
 
 #if ON_GBA
@@ -214,7 +210,8 @@ void PokeBox::print(PokemonTables *pokeTable, std::ostream &os)
     for (int i = 0; i < currIndex; i++)
     {
         os << "\n"
-           << "---------------- " << "POKEMON #" << i << " ----------------" << "\n";
+           << "---------------- " << "POKEMON #" << i << " ----------------"
+           << "\n";
         boxStorage[i]->print(pokeTable, os);
         os << "\n";
     }

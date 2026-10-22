@@ -1,9 +1,8 @@
 #include "gb_rom_values/gb_rom_values.h"
 
-const struct GB_ROM gb_rom_values_kor[] = {
-    {
-        // KOR_GREEN
-    },
+const struct GB_ROM gb_rom_values_kor[] = {{
+                                               // KOR_GREEN
+                                           },
     {
         // KOR_RED
     },
@@ -20,7 +19,7 @@ const struct GB_ROM gb_rom_values_kor[] = {
         .box_data_size = 0x462,
         .wCurrentBoxNum = 0x01D94F, // wCurBox
         .wBoxDataStart = 0x01ADAE}, // sBox
-    {// KOR_SILVER
+    {                               // KOR_SILVER
         .language = KOR_ID,
         .version = SILVER_ID,
         .generation = 2,
@@ -29,7 +28,7 @@ const struct GB_ROM gb_rom_values_kor[] = {
         .wBoxDataStart = 0x01ADAE}, // sBox
     {
         // KOR_CRYSTAL},
-    }
-};
+    }};
 
-const u16 gb_rom_values_kor_size = static_cast<u16>(sizeof(gb_rom_values_kor) / sizeof(struct GB_ROM));
+const u16 gb_rom_values_kor_size =
+    static_cast<u16>(sizeof(gb_rom_values_kor) / sizeof(struct GB_ROM));

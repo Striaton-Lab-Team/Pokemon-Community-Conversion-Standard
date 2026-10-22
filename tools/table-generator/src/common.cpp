@@ -5,9 +5,11 @@
 #include <cstring>
 #include <filesystem>
 
-// Data pulled from https://docs.google.com/spreadsheets/d/14LLs5lLqWasFcssBmJdGXjjYxARAJBa_QUOUhXZt4v8/edit
+// Data pulled from
+// https://docs.google.com/spreadsheets/d/14LLs5lLqWasFcssBmJdGXjjYxARAJBa_QUOUhXZt4v8/edit
 
-void writeTable(const char *input_path, const char *output_path, const char *filename, const char *buffer, size_t buffer_size)
+void writeTable(const char *input_path, const char *output_path, const char *filename,
+    const char *buffer, size_t buffer_size)
 {
     char full_output_path[4096];
 
@@ -26,11 +28,12 @@ void writeTable(const char *input_path, const char *output_path, const char *fil
     {
 
         std::filesystem::file_time_type inf_time = std::filesystem::last_write_time(input_path);
-        std::filesystem::file_time_type outf_time = std::filesystem::last_write_time(full_output_path);
+        std::filesystem::file_time_type outf_time =
+            std::filesystem::last_write_time(full_output_path);
 
         if (outf_time > inf_time)
         {
-            //printf("File %s is newer than %s, skipping\n", full_output_path, input_path);
+            // printf("File %s is newer than %s, skipping\n", full_output_path, input_path);
             printf("S");
             return;
         }

@@ -1,106 +1,60 @@
 #include "Pokemon.h"
 
-Pokemon::Pokemon()
-{
-    isValid = false;
-}
+Pokemon::Pokemon() { isValid = false; }
 
-u32 Pokemon::getSpeciesIndexNumber()
-{
-    return 0;
-}
+u32 Pokemon::getSpeciesIndexNumber() { return 0; }
 
-UnownLetter Pokemon::getUnownLetter()
-{
-    return NO_LETTER;
-}
+UnownLetter Pokemon::getUnownLetter() { return NO_LETTER; }
 
-bool Pokemon::getIsShiny()
-{
-    return false;
-}
+bool Pokemon::getIsShiny() { return false; }
 
 bool Pokemon::getIsHatchable()
 {
     Species mon = (Species)getSpeciesIndexNumber();
-    return (
-        mon != DITTO && 
-        mon != ARTICUNO &&
-        mon != MOLTRES &&
-        mon != ZAPDOS &&
-        mon != MEWTWO &&
-        mon != MEW &&
-        mon != UNOWN &&
-        mon != RAIKOU &&
-        mon != ENTEI &&
-        mon != SUICUNE &&
-        mon != LUGIA &&
-        mon != HO_OH &&
-        mon != CELEBI
-    );
+    return (mon != DITTO && mon != ARTICUNO && mon != MOLTRES && mon != ZAPDOS && mon != MEWTWO &&
+            mon != MEW && mon != UNOWN && mon != RAIKOU && mon != ENTEI && mon != SUICUNE &&
+            mon != LUGIA && mon != HO_OH && mon != CELEBI);
 }
 
 bool Pokemon::getIsMythical()
 {
     Species mon = (Species)getSpeciesIndexNumber();
-    return (
-        mon == MEW ||
-        mon == CELEBI
-    );
+    return (mon == MEW || mon == CELEBI);
 }
 
 bool Pokemon::getReversesPID()
 {
     Species mon = (Species)getSpeciesIndexNumber();
-    return (
-        mon == MEW ||
-        mon == UNOWN ||
-        mon == CELEBI
-    );
+    return (mon == MEW || mon == UNOWN || mon == CELEBI);
 }
 
 bool Pokemon::getIsRoamer()
 {
     Species mon = (Species)getSpeciesIndexNumber();
-    return (
-        mon == RAIKOU ||
-        mon == ENTEI ||
-        mon == SUICUNE
-    );
+    return (mon == RAIKOU || mon == ENTEI || mon == SUICUNE);
 }
 
 bool Pokemon::getIsNido()
 {
     Species mon = (Species)getSpeciesIndexNumber();
-    return (
-        mon == NIDORAN_F ||
-        mon == NIDORINA ||
-        mon == NIDOQUEEN ||
-        mon == NIDORAN_M ||
-        mon == NIDORINO ||
-        mon == NIDOKING
-        );
+    return (mon == NIDORAN_F || mon == NIDORINA || mon == NIDOQUEEN || mon == NIDORAN_M ||
+            mon == NIDORINO || mon == NIDOKING);
 }
 
 bool Pokemon::getIsWildEncounter()
 {
     Species mon = (Species)getSpeciesIndexNumber();
-    return (
-        mon == DITTO ||
-        mon == UNOWN
-    );
+    return (mon == DITTO || mon == UNOWN);
 }
 
-u32 Pokemon::getVar(const DataVarInfo& dataVar)
-{
-    return getVar(dataVar, 0);
-}
+u32 Pokemon::getVar(const DataVarInfo &dataVar) { return getVar(dataVar, 0); }
 
-u32 Pokemon::getVar(const DataVarInfo& dataVar, int extraByteOffset)
+u32 Pokemon::getVar(const DataVarInfo &dataVar, int extraByteOffset)
 {
     // This bounds check can be triggered in a valid scenario:
-    // if the pokémon is a party pokemon, it has more data than if it's stored in the box.
-    if(dataVar.byteOffset >= dataArraySize)
+    // if the pokémon is a party pokemon, it has more data than if it's stored
+    // in the box.
+    if (dataVar.byteOffset >= dataArraySize)
     {
         return 0;
     }
@@ -108,7 +62,8 @@ u32 Pokemon::getVar(const DataVarInfo& dataVar, int extraByteOffset)
     u32 out = 0;
     if (dataVar.dataLength < 8)
     { // is less than a byte, do bitwise stuff on a single byte
-        // ... but we can't assume that the data is within a single byte (thanks gen 3)
+        // ... but we can't assume that the data is within a single byte (thanks
+        // gen 3)
         if (dataVar.dataLength + dataVar.bitOffset > 8)
         {
             int numBytes = (dataVar.dataLength + dataVar.bitOffset) / 8 + 1;
@@ -126,7 +81,8 @@ u32 Pokemon::getVar(const DataVarInfo& dataVar, int extraByteOffset)
         }
         else
         {
-            out = (dataArrayPtr[dataVar.byteOffset + extraByteOffset] >> dataVar.bitOffset) & sizeToMask(dataVar.dataLength);
+            out = (dataArrayPtr[dataVar.byteOffset + extraByteOffset] >> dataVar.bitOffset) &
+                  sizeToMask(dataVar.dataLength);
         }
     }
     else
@@ -142,16 +98,17 @@ u32 Pokemon::getVar(const DataVarInfo& dataVar, int extraByteOffset)
     return out;
 }
 
-bool Pokemon::setVar(const DataVarInfo& dataVar, u32 newValue)
+bool Pokemon::setVar(const DataVarInfo &dataVar, u32 newValue)
 {
     return setVar(dataVar, 0, newValue);
 }
 
-bool Pokemon::setVar(const DataVarInfo& dataVar, int extraByteOffset, u32 newValue)
+bool Pokemon::setVar(const DataVarInfo &dataVar, int extraByteOffset, u32 newValue)
 {
     if (dataVar.dataLength < 8)
     { // is less than a byte, do bitwise stuff on a single byte
-      // ... but we can't assume that the data is within a single byte (thanks gen 3)
+      // ... but we can't assume that the data is within a single byte (thanks
+      // gen 3)
         if (dataVar.dataLength + dataVar.bitOffset > 8)
         {
             int numBytes = (dataVar.dataLength + dataVar.bitOffset) / 8 + 1;
@@ -163,14 +120,19 @@ bool Pokemon::setVar(const DataVarInfo& dataVar, int extraByteOffset, u32 newVal
             for (int i = 0; i < numBytes; i++)
             {
                 arrayIndex = (isBigEndian ? i : numBytes - (i + 1));
-                dataArrayPtr[dataVar.byteOffset + arrayIndex + extraByteOffset] &= ~((sizeToMask(dataVar.dataLength) << dataVar.bitOffset) >> (arrayIndex * 8));
-                dataArrayPtr[dataVar.byteOffset + arrayIndex + extraByteOffset] |= ((newValue & sizeToMask(dataVar.dataLength)) << dataVar.bitOffset) >> (arrayIndex * 8);
+                dataArrayPtr[dataVar.byteOffset + arrayIndex + extraByteOffset] &=
+                    ~((sizeToMask(dataVar.dataLength) << dataVar.bitOffset) >> (arrayIndex * 8));
+                dataArrayPtr[dataVar.byteOffset + arrayIndex + extraByteOffset] |=
+                    ((newValue & sizeToMask(dataVar.dataLength)) << dataVar.bitOffset) >>
+                    (arrayIndex * 8);
             }
         }
         else
         {
-            dataArrayPtr[dataVar.byteOffset + extraByteOffset] &= ~(sizeToMask(dataVar.dataLength) << dataVar.bitOffset);
-            dataArrayPtr[dataVar.byteOffset + extraByteOffset] |= (newValue & sizeToMask(dataVar.dataLength)) << dataVar.bitOffset;
+            dataArrayPtr[dataVar.byteOffset + extraByteOffset] &=
+                ~(sizeToMask(dataVar.dataLength) << dataVar.bitOffset);
+            dataArrayPtr[dataVar.byteOffset + extraByteOffset] |=
+                (newValue & sizeToMask(dataVar.dataLength)) << dataVar.bitOffset;
         }
     }
     else
@@ -180,7 +142,8 @@ bool Pokemon::setVar(const DataVarInfo& dataVar, int extraByteOffset, u32 newVal
         for (int i = 0; i < numBytes; i++)
         {
             arrayIndex = (isBigEndian ? i : numBytes - (i + 1));
-            dataArrayPtr[dataVar.byteOffset + arrayIndex + extraByteOffset] = (newValue >> (8 * ((numBytes - 1) - i)));
+            dataArrayPtr[dataVar.byteOffset + arrayIndex + extraByteOffset] =
+                (newValue >> (8 * ((numBytes - 1) - i)));
         }
     }
     return true;

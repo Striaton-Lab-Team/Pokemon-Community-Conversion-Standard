@@ -4,38 +4,32 @@
 #include "Gen3SaveFileReader.h"
 #include "pccs_utils.h"
 
-Gen3SaveFileReader::Gen3SaveFileReader(FILE* saveFile)
-    : saveFile_(saveFile)
-    , curOffset_(0)
-{
-}
+Gen3SaveFileReader::Gen3SaveFileReader(FILE *saveFile) : saveFile_(saveFile), curOffset_(0) {}
 
-Gen3SaveFileReader::~Gen3SaveFileReader()
-{
-}
+Gen3SaveFileReader::~Gen3SaveFileReader() {}
 
 void Gen3SaveFileReader::read(u8 *buffer, u32 size)
 {
-    if(!fread(buffer, 1, size, saveFile_))
+    if (!fread(buffer, 1, size, saveFile_))
     {
         return;
     }
     curOffset_ += size;
 }
 
-void Gen3SaveFileReader::readUint8(u8& outByte)
+void Gen3SaveFileReader::readUint8(u8 &outByte)
 {
-    if(!fread(&outByte, 1, 1, saveFile_))
+    if (!fread(&outByte, 1, 1, saveFile_))
     {
         return;
     }
     curOffset_ += 1;
 }
 
-void Gen3SaveFileReader::readUint16(u16& outWord, Endianness fieldEndianness)
+void Gen3SaveFileReader::readUint16(u16 &outWord, Endianness fieldEndianness)
 {
     u8 buffer[2];
-    if(!fread(buffer, 1, sizeof(buffer), saveFile_))
+    if (!fread(buffer, 1, sizeof(buffer), saveFile_))
     {
         return;
     }
@@ -43,10 +37,10 @@ void Gen3SaveFileReader::readUint16(u16& outWord, Endianness fieldEndianness)
     curOffset_ += sizeof(buffer);
 }
 
-void Gen3SaveFileReader::readUint32(u32& outDWord, Endianness fieldEndianness)
+void Gen3SaveFileReader::readUint32(u32 &outDWord, Endianness fieldEndianness)
 {
     u8 buffer[4];
-    if(!fread(buffer, 1, sizeof(buffer), saveFile_))
+    if (!fread(buffer, 1, sizeof(buffer), saveFile_))
     {
         return;
     }
@@ -100,8 +94,5 @@ void Gen3SaveFileReader::rewind(u32 numBytes)
     curOffset_ -= numBytes;
 }
 
-bool Gen3SaveFileReader::shouldRecalculateChecksumsOnFinish() const
-{
-    return true;
-}
+bool Gen3SaveFileReader::shouldRecalculateChecksumsOnFinish() const { return true; }
 #endif

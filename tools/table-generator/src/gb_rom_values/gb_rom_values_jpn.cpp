@@ -13,7 +13,7 @@ const struct GB_ROM gb_rom_values_jpn[] = {
         .version = RED_ID,
         .generation = 1,
         .box_data_size = 0x566,
-        .wCurrentBoxNum = 0xD51F, 
+        .wCurrentBoxNum = 0xD51F,
         .wBoxDataStart = 0xD9B2},
     {// JPN_BLUE
         .language = JPN_ID,
@@ -36,14 +36,14 @@ const struct GB_ROM gb_rom_values_jpn[] = {
         .box_data_size = 0x548,
         .wCurrentBoxNum = 0x01D8AF, // wCurBox
         .wBoxDataStart = 0x01AD10}, // sBox
-    {// JPN_SILVER
+    {                               // JPN_SILVER
         .language = JPN_ID,
         .version = SILVER_ID,
         .generation = 2,
         .box_data_size = 0x548,
         .wCurrentBoxNum = 0x01D8AF, // wCurBox
         .wBoxDataStart = 0x01AD10}, // sBox
-    {// JPN_CRYSTAL
+    {                               // JPN_CRYSTAL
         .language = JPN_ID,
         .version = CRYSTAL_ID,
         .generation = 2,
@@ -52,4 +52,5 @@ const struct GB_ROM gb_rom_values_jpn[] = {
         .wBoxDataStart = 0x01AD10}, // sBox
 };
 
-const u16 gb_rom_values_jpn_size = static_cast<u16>(sizeof(gb_rom_values_jpn) / sizeof(struct GB_ROM));
+const u16 gb_rom_values_jpn_size =
+    static_cast<u16>(sizeof(gb_rom_values_jpn) / sizeof(struct GB_ROM));

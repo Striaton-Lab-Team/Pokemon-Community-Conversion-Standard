@@ -1,0 +1,3 @@
+# ignore the following files:
+tests/src/catch_amalgamated.cpp
+tests/include/catch_amalgamated.hpp

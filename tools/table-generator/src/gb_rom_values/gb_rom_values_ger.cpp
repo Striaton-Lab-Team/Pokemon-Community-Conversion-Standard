@@ -1,9 +1,9 @@
 #include "gb_rom_values/gb_rom_values.h"
 
-const struct GB_ROM gb_rom_values_ger[] = {
-    {
-    // GER_GREEN
-    },{// GER_RED
+const struct GB_ROM gb_rom_values_ger[] = {{
+                                               // GER_GREEN
+                                           },
+    {// GER_RED
         .language = GER_ID,
         .version = RED_ID,
         .generation = 1,
@@ -33,7 +33,7 @@ const struct GB_ROM gb_rom_values_ger[] = {
         .garbageDataLocation = 0x1F8E,
 
         .wRemoveMonFromBox = 0xCF9A,
-     .wCurrentBoxNum = 0xD5A5,
+        .wCurrentBoxNum = 0xD5A5,
         .wBoxCount = 0xDA85,
         .wWhichPokemon = 0x00CF97,
         .wBoxDataStart = 0xDA85,
@@ -80,7 +80,7 @@ const struct GB_ROM gb_rom_values_ger[] = {
         .garbageDataLocation = 0x1F8E,
 
         .wRemoveMonFromBox = 0xCF9A,
-     .wCurrentBoxNum = 0xD5A5,
+        .wCurrentBoxNum = 0xD5A5,
         .wBoxCount = 0xDA85,
         .wWhichPokemon = 0xCF95,
         .wBoxDataStart = 0xDA85,
@@ -112,8 +112,7 @@ const struct GB_ROM gb_rom_values_ger[] = {
         .padding_1 = 0,
 
         .clearScreen = 0x0016DD,
-        .CableClub_TextBoxBorder =
-            0x0016F0, // TextBoxBoarder, since the Cable Club isn't loaded
+        .CableClub_TextBoxBorder = 0x0016F0, // TextBoxBoarder, since the Cable Club isn't loaded
         .placeString = 0x001723,
         .Serial_ExchangeBytes = 0x001FD0,
         ._RemovePokemon = 0x179F2,
@@ -128,7 +127,7 @@ const struct GB_ROM gb_rom_values_ger[] = {
         .garbageDataLocation = 0x0161,
 
         .wRemoveMonFromBox = 0xCF99,
-     .wCurrentBoxNum = 0xD5A4,
+        .wCurrentBoxNum = 0xD5A4,
         .wBoxCount = 0xDA84,
         .wWhichPokemon = 0xCF96,
         .wBoxDataStart = 0xDA84,
@@ -154,9 +153,8 @@ const struct GB_ROM gb_rom_values_ger[] = {
         .box_data_size = 0x44E,
 
         .print_string_start = 0xC442,
-        .stack_overwrite_location =
-            0xDFCB, // Found by seeing where 772C is stored in the stack, 772C
-                    // is the code that calls PlaceString
+        .stack_overwrite_location = 0xDFCB, // Found by seeing where 772C is stored in the stack,
+                                            // 772C is the code that calls PlaceString
         .short_pkmn_name = 0x4E,
         .pointer_pkmn_name = 0,
         .padding_1 = 0,
@@ -176,18 +174,17 @@ const struct GB_ROM gb_rom_values_ger[] = {
         .CloseSRAM = 0,
         .garbageDataLocation = 0x0654,
 
-        .wRemoveMonFromBox = 0x01D008,   // wPokemonWithdrawDepositParameter
-        .wCurrentBoxNum = 0x01D8BC,      // wCurBox
-        .wBoxCount = 0x01AD6C,           // sBoxCount
-        .wWhichPokemon = 0x01D005,       // wCurPartyMon
-        .wBoxDataStart = 0x01AD6C,       // sBoxStart
-        .wBoxDataEnd = 0x01B1BA,         // sBoxEnd
+        .wRemoveMonFromBox = 0x01D008,     // wPokemonWithdrawDepositParameter
+        .wCurrentBoxNum = 0x01D8BC,        // wCurBox
+        .wBoxCount = 0x01AD6C,             // sBoxCount
+        .wWhichPokemon = 0x01D005,         // wCurPartyMon
+        .wBoxDataStart = 0x01AD6C,         // sBoxStart
+        .wBoxDataEnd = 0x01B1BA,           // sBoxEnd
         .wSerialEnemyDataBlock = 0x01DD40, // wOTPartyData
         .wEnemyMonSpecies = 0x01D0EF,
 
-        .wSerialEnemyMonsPatchList = 0xC5D0, // wOTPatchLists
-        .wSerialOtherGameboyRandomNumberListBlock =
-            0xD0EF, // wOTLinkBattleRNData
+        .wSerialEnemyMonsPatchList = 0xC5D0,                // wOTPatchLists
+        .wSerialOtherGameboyRandomNumberListBlock = 0xD0EF, // wOTLinkBattleRNData
         .hSerialConnectionStatus = 0xFFCD,
 
         .transferStringLocation = 0xC444,
@@ -204,9 +201,8 @@ const struct GB_ROM gb_rom_values_ger[] = {
         .box_data_size = 0x44E,
 
         .print_string_start = 0xC442,
-        .stack_overwrite_location =
-            0xDFCB, // Found by seeing where 772C is stored in the stack, 772C
-                    // is the code that calls PlaceString
+        .stack_overwrite_location = 0xDFCB, // Found by seeing where 772C is stored in the stack,
+                                            // 772C is the code that calls PlaceString
         .short_pkmn_name = 0x4E,
         .pointer_pkmn_name = 0,
         .padding_1 = 0,
@@ -226,18 +222,17 @@ const struct GB_ROM gb_rom_values_ger[] = {
         .CloseSRAM = 0,
         .garbageDataLocation = 0x0654,
 
-        .wRemoveMonFromBox = 0x01D008,   // wPokemonWithdrawDepositParameter
-     .wCurrentBoxNum = 0x01D8BC,      // wCurBox
-        .wBoxCount = 0x01AD6C,           // sBoxCount
-        .wWhichPokemon = 0x01D005,       // wCurPartyMon
-        .wBoxDataStart = 0x01AD6C,       // sBoxStart
-        .wBoxDataEnd = 0x01B1BA,         // sBoxEnd
+        .wRemoveMonFromBox = 0x01D008,     // wPokemonWithdrawDepositParameter
+        .wCurrentBoxNum = 0x01D8BC,        // wCurBox
+        .wBoxCount = 0x01AD6C,             // sBoxCount
+        .wWhichPokemon = 0x01D005,         // wCurPartyMon
+        .wBoxDataStart = 0x01AD6C,         // sBoxStart
+        .wBoxDataEnd = 0x01B1BA,           // sBoxEnd
         .wSerialEnemyDataBlock = 0x01DD40, // wOTPartyData
         .wEnemyMonSpecies = 0x01D0EF,
 
-        .wSerialEnemyMonsPatchList = 0xC5D0, // wOTPatchLists
-        .wSerialOtherGameboyRandomNumberListBlock =
-            0xD0EF, // wOTLinkBattleRNData
+        .wSerialEnemyMonsPatchList = 0xC5D0,                // wOTPatchLists
+        .wSerialOtherGameboyRandomNumberListBlock = 0xD0EF, // wOTLinkBattleRNData
         .hSerialConnectionStatus = 0xFFCD,
 
         .transferStringLocation = 0xC444,
@@ -254,10 +249,9 @@ const struct GB_ROM gb_rom_values_ger[] = {
         .box_data_size = 0x44E,
 
         .print_string_start = 0xC544,
-        .stack_overwrite_location =
-            0xE0BB, // Found by seeing where 7622 is stored in the stack, 7622
-                    // is the code that calls PlaceString
-                    // (PlaceTradePartnerNamesAndParty)
+        .stack_overwrite_location = 0xE0BB, // Found by seeing where 7622 is stored in the stack,
+                                            // 7622 is the code that calls PlaceString
+                                            // (PlaceTradePartnerNamesAndParty)
         .short_pkmn_name = 0x4E,
         .pointer_pkmn_name = 0,
         .padding_1 = 0,
@@ -276,18 +270,17 @@ const struct GB_ROM gb_rom_values_ger[] = {
         .CloseSRAM = 0,
         .garbageDataLocation = 0x0770,
 
-        .wRemoveMonFromBox = 0x01D10B,   // wPokemonWithdrawDepositParameter
-     .wCurrentBoxNum = 0x01DB72,      // wCurBox
-        .wBoxCount = 0x01AD10,           // sBoxCount
-        .wWhichPokemon = 0x01D109,       // wCurPartyMon
-        .wBoxDataStart = 0x01AD10,       // sBox
-        .wBoxDataEnd = 0x01B15E,         // sBoxEnd
+        .wRemoveMonFromBox = 0x01D10B,     // wPokemonWithdrawDepositParameter
+        .wCurrentBoxNum = 0x01DB72,        // wCurBox
+        .wBoxCount = 0x01AD10,             // sBoxCount
+        .wWhichPokemon = 0x01D109,         // wCurPartyMon
+        .wBoxDataStart = 0x01AD10,         // sBox
+        .wBoxDataEnd = 0x01B15E,           // sBoxEnd
         .wSerialEnemyDataBlock = 0x01D26B, // wOTPartyData
         .wEnemyMonSpecies = 0x01D206,
 
-        .wSerialEnemyMonsPatchList = 0xC6D0, // wOTPatchLists
-        .wSerialOtherGameboyRandomNumberListBlock =
-            0xD206, // wOTLinkBattleRNData
+        .wSerialEnemyMonsPatchList = 0xC6D0,                // wOTPatchLists
+        .wSerialOtherGameboyRandomNumberListBlock = 0xD206, // wOTLinkBattleRNData
         .hSerialConnectionStatus = 0xFFCB,
 
         .transferStringLocation = 0xC544,

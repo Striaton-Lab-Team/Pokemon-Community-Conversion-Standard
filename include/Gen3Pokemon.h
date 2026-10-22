@@ -13,7 +13,7 @@ static const u32 GEN3_PKMN_DATA_SUBSTRUCT_OFFSET = 0x20;
 class Gen3Pokemon : public Pokemon // The class for gen 3 Pokemon
 
 {
-public:
+  public:
     Gen3Pokemon();
     Gen3Pokemon(const Gen3Pokemon &other);
 
@@ -27,14 +27,15 @@ public:
 
     int reverseRand(u16 first, u16 second, u32 *values);
 
-    // These are stored internally so that they can be set by different functions
+    // These are stored internally so that they can be set by different
+    // functions
     UnownLetter internalUnownLetter;
     Nature internalNature;
     Gender internalGender;
     int internalSize;
     int internalAbility;
 
-protected:
+  protected:
     // These store the data bytes
     byte dataArray[80] = {0};
 
@@ -43,159 +44,80 @@ protected:
     u32 currSubstructureLehmerCode;
 
 #pragma region
-    // Since there is only the Pokemon parent class, we can directly define these directly
+    // Since there is only the Pokemon parent class, we can directly define
+    // these directly
     static const DataVarInfo
         // All of the data info variables
         personalityValue,
-        trainerID,
-        secretID,
+        trainerID, secretID,
         nicknameLetterOne, // This is silly. Change this.
-        nicknameLetterTwo,
-        nicknameLetterThree,
-        nicknameLetterFour,
-        nicknameLetterFive,
-        nicknameLetterSix,
-        nicknameLetterSeven,
-        nicknameLetterEight,
-        nicknameLetterNine,
-        nicknameLetterTen,
-        language,
-        isBadEgg,
-        hasSpecies,
-        useEggName,
-        blockBoxRS,
+        nicknameLetterTwo, nicknameLetterThree, nicknameLetterFour, nicknameLetterFive,
+        nicknameLetterSix, nicknameLetterSeven, nicknameLetterEight, nicknameLetterNine,
+        nicknameLetterTen, language, isBadEgg, hasSpecies, useEggName, blockBoxRS,
         // unusedFlags,
         originalTrainerNameLetterOne, // This is also silly. Change this.
-        originalTrainerNameLetterTwo,
-        originalTrainerNameLetterThree,
-        originalTrainerNameLetterFour,
-        originalTrainerNameLetterFive,
-        originalTrainerNameLetterSix,
-        originalTrainerNameLetterSeven,
-        markings,
-        checksum;
+        originalTrainerNameLetterTwo, originalTrainerNameLetterThree, originalTrainerNameLetterFour,
+        originalTrainerNameLetterFive, originalTrainerNameLetterSix, originalTrainerNameLetterSeven,
+        markings, checksum;
     // unknown;
 
-    static const DataVarInfo
-        *nickname[10],
-        *originalTrainerName[7];
+    static const DataVarInfo *nickname[10], *originalTrainerName[7];
 
     // data section G
-    static const DataVarInfo
-        speciesIndexNumber,
-        heldItem,
-        expPoints,
-        ppUpNumMoveOne,
-        ppUpNumMoveTwo,
-        ppUpNumMoveThree,
-        ppUpNumMoveFour,
-        friendship;
+    static const DataVarInfo speciesIndexNumber, heldItem, expPoints, ppUpNumMoveOne,
+        ppUpNumMoveTwo, ppUpNumMoveThree, ppUpNumMoveFour, friendship;
     // unused;
 
-    static const DataVarInfo
-        *ppUpNums[4];
+    static const DataVarInfo *ppUpNums[4];
 
     // data section A
-    static const DataVarInfo
-        moveOne,
-        moveTwo,
-        moveThree,
-        moveFour,
-        moveOnePP,
-        moveTwoPP,
-        moveThreePP,
-        moveFourPP;
-    static const DataVarInfo
-        *moves[4],
-        *ppUpTotals[4];
+    static const DataVarInfo moveOne, moveTwo, moveThree, moveFour, moveOnePP, moveTwoPP,
+        moveThreePP, moveFourPP;
+    static const DataVarInfo *moves[4], *ppUpTotals[4];
 
     // data section E
-    static const DataVarInfo
-        hpEVs,
-        attackEVs,
-        defenseEVs,
-        speedEVs,
-        specialAttackEVs,
-        specialDefenseEVs,
-        coolnessCondition,
-        beautyCondition,
-        cutenessCondition,
-        smartnessCondition,
-        toughnessCondition,
-        sheen;
+    static const DataVarInfo hpEVs, attackEVs, defenseEVs, speedEVs, specialAttackEVs,
+        specialDefenseEVs, coolnessCondition, beautyCondition, cutenessCondition,
+        smartnessCondition, toughnessCondition, sheen;
 
-    static const DataVarInfo
-        *EVs[6],
-        *contestConditions[5];
+    static const DataVarInfo *EVs[6], *contestConditions[5];
 
     static const DataVarInfo
 
         // data section M
         pokerusStrain,
-        pokerusDaysRemaining,
-        metLocation,
-        levelMet,
-        gameOfOrigin,
-        pokeballCaughtIn,
-        originalTrainerGender,
-        hpIVs,
-        attackIVs,
-        defenseIVs,
-        speedIVs,
-        specialAttackIVs,
-        specialDefenseIVs,
-        isEgg,
-        ability,
+        pokerusDaysRemaining, metLocation, levelMet, gameOfOrigin, pokeballCaughtIn,
+        originalTrainerGender, hpIVs, attackIVs, defenseIVs, speedIVs, specialAttackIVs,
+        specialDefenseIVs, isEgg, ability,
         coolNormalContestRibbon, // This is also very silly. Change it.
-        coolSuperContestRibbon,
-        coolHyperContestRibbon,
-        coolMasterContestRibbon,
-        beautyNormalContestRibbon,
-        beautySuperContestRibbon,
-        beautyHyperContestRibbon,
-        beautyMasterContestRibbon,
-        cuteNormalContestRibbon,
-        cuteSuperContestRibbon,
-        cuteHyperContestRibbon,
-        cuteMasterContestRibbon,
-        smartNormalContestRibbon,
-        smartSuperContestRibbon,
-        smartHyperContestRibbon,
-        smartMasterContestRibbon,
-        toughNormalContestRibbon,
-        toughSuperContestRibbon,
-        toughHyperContestRibbon,
-        toughMasterContestRibbon,
-        championRibbon,
-        winningRibbon,
-        victoryRibbon,
-        artistRibbon,
-        effortRibbon,
-        battleChampionRibbon,
-        regionalChampionRibbon,
-        nationalChampionRibbon,
-        countryRibbon,
-        nationalRibbon,
-        earthRibbon,
-        unusedRibbons,
-        fatefulEncounterObedience;
+        coolSuperContestRibbon, coolHyperContestRibbon, coolMasterContestRibbon,
+        beautyNormalContestRibbon, beautySuperContestRibbon, beautyHyperContestRibbon,
+        beautyMasterContestRibbon, cuteNormalContestRibbon, cuteSuperContestRibbon,
+        cuteHyperContestRibbon, cuteMasterContestRibbon, smartNormalContestRibbon,
+        smartSuperContestRibbon, smartHyperContestRibbon, smartMasterContestRibbon,
+        toughNormalContestRibbon, toughSuperContestRibbon, toughHyperContestRibbon,
+        toughMasterContestRibbon, championRibbon, winningRibbon, victoryRibbon, artistRibbon,
+        effortRibbon, battleChampionRibbon, regionalChampionRibbon, nationalChampionRibbon,
+        countryRibbon, nationalRibbon, earthRibbon, unusedRibbons, fatefulEncounterObedience;
 
-    static const DataVarInfo
-        *IVs[6],
-        *ribbons[31];
+    static const DataVarInfo *IVs[6], *ribbons[31];
 #pragma endregion
 
-    // This is used to easily print out a Pokemon, when using a standard C++ terminal
+    // This is used to easily print out a Pokemon, when using a standard C++
+    // terminal
 #if ON_GBA
 #else
-public:
+  public:
     void print(PokemonTables *pokeTable, std::ostream &os);
     std::string printDataArray(bool encrypedData);
     std::array<byte, 80> outputByteArray(bool encrypedData, bool standardizeSubstruct);
 #endif
 
-public:
-    u32 getSubstructOffset(int substructIndex) { return substructOffsets[substructIndex] * GEN3_POKEMON_SUBSTRUCTURE_SIZE; }
+  public:
+    u32 getSubstructOffset(int substructIndex)
+    {
+        return substructOffsets[substructIndex] * GEN3_POKEMON_SUBSTRUCTURE_SIZE;
+    }
 
     // All of the simple getters and setters are defined here
     u32 getPersonalityValue() { return getVar(personalityValue); }
@@ -214,15 +136,24 @@ public:
     u32 getFriendship() { return getVar(friendship, getSubstructOffset(SUB_G)); }
     u32 getSheen() { return getVar(sheen, getSubstructOffset(SUB_E)); }
     u32 getPokerusStrain() { return getVar(pokerusStrain, getSubstructOffset(SUB_M)); }
-    u32 getPokerusDaysRemaining() { return getVar(pokerusDaysRemaining, getSubstructOffset(SUB_M)); }
+    u32 getPokerusDaysRemaining()
+    {
+        return getVar(pokerusDaysRemaining, getSubstructOffset(SUB_M));
+    }
     u32 getMetLocation() { return getVar(metLocation, getSubstructOffset(SUB_M)); }
     u32 getLevelMet() { return getVar(levelMet, getSubstructOffset(SUB_M)); }
     u32 getGameOfOrigin() { return getVar(gameOfOrigin, getSubstructOffset(SUB_M)); }
     u32 getPokeballCaughtIn() { return getVar(pokeballCaughtIn, getSubstructOffset(SUB_M)); }
-    u32 getOriginalTrainerGender() { return getVar(originalTrainerGender, getSubstructOffset(SUB_M)); }
+    u32 getOriginalTrainerGender()
+    {
+        return getVar(originalTrainerGender, getSubstructOffset(SUB_M));
+    }
     u32 getIsEgg() { return getVar(isEgg, getSubstructOffset(SUB_M)); }
     u32 getAbility() { return getVar(ability, getSubstructOffset(SUB_M)); }
-    u32 getFatefulEncounterObedience() { return getVar(fatefulEncounterObedience, getSubstructOffset(SUB_M)); }
+    u32 getFatefulEncounterObedience()
+    {
+        return getVar(fatefulEncounterObedience, getSubstructOffset(SUB_M));
+    }
 
     bool setTrainerID(u32 newVal) { return setVar(trainerID, newVal); }
     bool setSecretID(u32 newVal) { return setVar(secretID, newVal); }
@@ -233,39 +164,96 @@ public:
     bool setBlockBoxRS(u32 newVal) { return setVar(blockBoxRS, newVal); }
     bool setMarkings(u32 newVal) { return setVar(markings, newVal); }
     bool setChecksum(u32 newVal) { return setVar(checksum, newVal); }
-    bool setSpeciesIndexNumber(u32 newVal) { return setVar(speciesIndexNumber, getSubstructOffset(SUB_G), newVal); }
+    bool setSpeciesIndexNumber(u32 newVal)
+    {
+        return setVar(speciesIndexNumber, getSubstructOffset(SUB_G), newVal);
+    }
     bool setHeldItem(Item newVal) { return setVar(heldItem, getSubstructOffset(SUB_G), newVal); }
     bool setExpPoints(u32 newVal) { return setVar(expPoints, getSubstructOffset(SUB_G), newVal); }
     bool setFriendship(u32 newVal) { return setVar(friendship, getSubstructOffset(SUB_G), newVal); }
     bool setSheen(u32 newVal) { return setVar(sheen, getSubstructOffset(SUB_E), newVal); }
-    bool setPokerusStrain(u32 newVal) { return setVar(pokerusStrain, getSubstructOffset(SUB_M), newVal); }
-    bool setPokerusDaysRemaining(u32 newVal) { return setVar(pokerusDaysRemaining, getSubstructOffset(SUB_M), newVal); }
-    bool setMetLocation(u32 newVal) { return setVar(metLocation, getSubstructOffset(SUB_M), newVal); }
+    bool setPokerusStrain(u32 newVal)
+    {
+        return setVar(pokerusStrain, getSubstructOffset(SUB_M), newVal);
+    }
+    bool setPokerusDaysRemaining(u32 newVal)
+    {
+        return setVar(pokerusDaysRemaining, getSubstructOffset(SUB_M), newVal);
+    }
+    bool setMetLocation(u32 newVal)
+    {
+        return setVar(metLocation, getSubstructOffset(SUB_M), newVal);
+    }
     bool setLevelMet(u32 newVal) { return setVar(levelMet, getSubstructOffset(SUB_M), newVal); }
-    bool setGameOfOrigin(Game newVal) { return setVar(gameOfOrigin, getSubstructOffset(SUB_M), newVal); }
-    bool setPokeballCaughtIn(u32 newVal) { return setVar(pokeballCaughtIn, getSubstructOffset(SUB_M), newVal); }
-    bool setOriginalTrainerGender(u32 newVal) { return setVar(originalTrainerGender, getSubstructOffset(SUB_M), newVal); }
+    bool setGameOfOrigin(Game newVal)
+    {
+        return setVar(gameOfOrigin, getSubstructOffset(SUB_M), newVal);
+    }
+    bool setPokeballCaughtIn(u32 newVal)
+    {
+        return setVar(pokeballCaughtIn, getSubstructOffset(SUB_M), newVal);
+    }
+    bool setOriginalTrainerGender(u32 newVal)
+    {
+        return setVar(originalTrainerGender, getSubstructOffset(SUB_M), newVal);
+    }
     bool setIsEgg(u32 newVal) { return setVar(isEgg, getSubstructOffset(SUB_M), newVal); }
-    bool setFatefulEncounterObedience(u32 newVal) { return setVar(fatefulEncounterObedience, getSubstructOffset(SUB_M), newVal); }
+    bool setFatefulEncounterObedience(u32 newVal)
+    {
+        return setVar(fatefulEncounterObedience, getSubstructOffset(SUB_M), newVal);
+    }
 
     // The ones that access arrays are defined here:
-    u32 getPPUpNum(int moveIndex) { return getVar(*ppUpNums[moveIndex], getSubstructOffset(SUB_G)); }
+    u32 getPPUpNum(int moveIndex)
+    {
+        return getVar(*ppUpNums[moveIndex], getSubstructOffset(SUB_G));
+    }
     u32 getMove(int moveIndex) { return getVar(*moves[moveIndex], getSubstructOffset(SUB_A)); }
-    u32 getPPTotal(int moveIndex) { return getVar(*ppUpTotals[moveIndex], getSubstructOffset(SUB_A)); }
+    u32 getPPTotal(int moveIndex)
+    {
+        return getVar(*ppUpTotals[moveIndex], getSubstructOffset(SUB_A));
+    }
     u32 getEV(Stat currStat) { return getVar(*EVs[currStat], getSubstructOffset(SUB_E)); }
-    u32 getContestCondition(Condition currCondition) { return getVar(*contestConditions[currCondition], getSubstructOffset(SUB_E)); }
+    u32 getContestCondition(Condition currCondition)
+    {
+        return getVar(*contestConditions[currCondition], getSubstructOffset(SUB_E));
+    }
     u32 getIV(Stat currStat) { return getVar(*IVs[currStat], getSubstructOffset(SUB_M)); }
-    u32 getRibbons(Ribbon currRibbon) { return getVar(*ribbons[currRibbon], getSubstructOffset(SUB_M)); }
+    u32 getRibbons(Ribbon currRibbon)
+    {
+        return getVar(*ribbons[currRibbon], getSubstructOffset(SUB_M));
+    }
     u32 getNicknameLetter(int index) { return getVar(*nickname[index]); };
     u32 getOTLetter(int index) { return getVar(*originalTrainerName[index]); };
 
-    bool setPPUpNum(int moveIndex, u32 newVal) { return setVar(*ppUpNums[moveIndex], getSubstructOffset(SUB_G), newVal); }
-    bool setMove(int moveIndex, u32 newVal) { return setVar(*moves[moveIndex], getSubstructOffset(SUB_A), newVal); }
-    bool setPPTotal(int moveIndex, u32 newVal) { return setVar(*ppUpTotals[moveIndex], getSubstructOffset(SUB_A), newVal); }
-    bool setEV(Stat currStat, u32 newVal) { return setVar(*EVs[currStat], getSubstructOffset(SUB_E), newVal); }
-    bool setContestCondition(Condition currCondition, u32 newVal) { return setVar(*contestConditions[currCondition], getSubstructOffset(SUB_E), newVal); }
-    bool setIV(Stat currStat, u32 newVal) { return setVar(*IVs[currStat], getSubstructOffset(SUB_M), newVal); }
-    bool setRibbons(Ribbon currRibbon, u32 newVal) { return setVar(*ribbons[currRibbon], getSubstructOffset(SUB_M), newVal); }
+    bool setPPUpNum(int moveIndex, u32 newVal)
+    {
+        return setVar(*ppUpNums[moveIndex], getSubstructOffset(SUB_G), newVal);
+    }
+    bool setMove(int moveIndex, u32 newVal)
+    {
+        return setVar(*moves[moveIndex], getSubstructOffset(SUB_A), newVal);
+    }
+    bool setPPTotal(int moveIndex, u32 newVal)
+    {
+        return setVar(*ppUpTotals[moveIndex], getSubstructOffset(SUB_A), newVal);
+    }
+    bool setEV(Stat currStat, u32 newVal)
+    {
+        return setVar(*EVs[currStat], getSubstructOffset(SUB_E), newVal);
+    }
+    bool setContestCondition(Condition currCondition, u32 newVal)
+    {
+        return setVar(*contestConditions[currCondition], getSubstructOffset(SUB_E), newVal);
+    }
+    bool setIV(Stat currStat, u32 newVal)
+    {
+        return setVar(*IVs[currStat], getSubstructOffset(SUB_M), newVal);
+    }
+    bool setRibbons(Ribbon currRibbon, u32 newVal)
+    {
+        return setVar(*ribbons[currRibbon], getSubstructOffset(SUB_M), newVal);
+    }
     bool setNicknameLetter(int index, u32 newVal) { return setVar(*nickname[index], newVal); };
     bool setOTLetter(int index, u32 newVal) { return setVar(*originalTrainerName[index], newVal); };
 
@@ -301,16 +289,17 @@ public:
 
     /**
      * @brief This function checks whether the data is currently encrypted.
-     * It does so by checking if the checksum matches. If it does, then it's decrypted.
-     * If it doesn't, then it's still encrypted.
+     * It does so by checking if the checksum matches. If it does, then it's
+     * decrypted. If it doesn't, then it's still encrypted.
      *
      * This is based on PK3.cs ->DecryptParty() in PKHex.
      */
     bool isEncrypted();
     u16 calculateChecksum();
 
-private:
-    // Encryption and decryption is the exact same operation. So we can just have one function for both.
+  private:
+    // Encryption and decryption is the exact same operation. So we can just
+    // have one function for both.
     void cryptStructures();
 };
 

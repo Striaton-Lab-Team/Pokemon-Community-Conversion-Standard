@@ -7,13 +7,13 @@
 
 class PokeBox // Stores up to 30 Pokemon in a box
 {
-private:
+  private:
     void convertPkmn(PokemonTables *table, int index);
     Pokemon *boxStorage[30];
     Pokemon *nullMon;
     int currIndex;
 
-public:
+  public:
     PokeBox();
     bool addPokemon(Pokemon *currPkmn);
     Pokemon *getPokemon(int index);

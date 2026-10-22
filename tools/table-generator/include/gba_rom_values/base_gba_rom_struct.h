@@ -32,9 +32,10 @@ typedef uint32_t u32;
 
 // WARNING: We must be explicit in the type declarations of the struct members here.
 // After all: data-generator runs on x86 and the structs will be read by the GBA's ARM processor.
-// So we must ensure the sizes of the struct members, as well as padding and alignment, remains consistent across platforms.
-// So please make sure to use data types which are explicit in their size. (such as uint32_t, uint8_t, etc.)
-// Because the size of the regular "int", "bool", "char" etc changes based on the platform architecture.
+// So we must ensure the sizes of the struct members, as well as padding and alignment, remains
+// consistent across platforms. So please make sure to use data types which are explicit in their
+// size. (such as uint32_t, uint8_t, etc.) Because the size of the regular "int", "bool", "char" etc
+// changes based on the platform architecture.
 struct ROM_DATA
 {
     int32_t is_valid;
@@ -46,7 +47,9 @@ struct ROM_DATA
     int32_t loc_copyMonToPC;
     int32_t loc_getSetPokedexFlag;
     int32_t loc_readFlashSector;
-    int32_t loc_loadSaveSection30; // The location of the function that loads save section 30: CEReaderTool_LoadTrainerTower_r in FRLG, TryReadTrainerHill_Internal in Emerald
+    int32_t loc_loadSaveSection30; // The location of the function that loads save section 30:
+                                   // CEReaderTool_LoadTrainerTower_r in FRLG,
+                                   // TryReadTrainerHill_Internal in Emerald
     int32_t loc_m4aMPlayStop;
     int32_t loc_MPlayStart;
     int32_t loc_CreateFanfareTask;
@@ -76,9 +79,11 @@ struct ROM_DATA
     int32_t text_region;
     int32_t special_DrawWholeMapView;
 
-    // PKHeX's list of flags is useful for making sure the detection is accurate: https://github.com/kwsch/PKHeX/blob/78a557c3cdaa6f48b42cc96df8ccb4d20b897937/PKHeX.Core/Resources/text/other/flags_rs.txt
-    int32_t e4_flag;           // The flag that is set when you become champion. Often listed as "GAME_CLEAR"
-    int32_t mg_flag;           // The flag that is set when you enable Mystery Gift. Known as "EXDATA_ENABLE" in RS
+    // PKHeX's list of flags is useful for making sure the detection is accurate:
+    // https://github.com/kwsch/PKHeX/blob/78a557c3cdaa6f48b42cc96df8ccb4d20b897937/PKHeX.Core/Resources/text/other/flags_rs.txt
+    int32_t e4_flag; // The flag that is set when you become champion. Often listed as "GAME_CLEAR"
+    int32_t mg_flag; // The flag that is set when you enable Mystery Gift. Known as "EXDATA_ENABLE"
+                     // in RS
     int32_t unused_flag_start; // The start of the unused flags and must have 31 open flags in a row
 
     u8 map_bank;

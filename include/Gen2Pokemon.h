@@ -5,7 +5,7 @@
 
 class Gen2Pokemon : public GBPokemon // The class for gen 2 Pokemon
 {
-public:
+  public:
     Gen2Pokemon(Language nLang, bool isPartyPkmn = false);
     byte dataArray[32];
 
@@ -29,16 +29,9 @@ public:
     bool setCaughtDataLocation(byte newVal) { return setVar(g2_caughtDataLocation, newVal); }
     bool setCurrentHP(byte newVal) { return setVar(g2_currentHP, newVal); }
 
-protected:
-    static const DataVarInfo
-        g2_heldItem,
-        g2_friendship,
-        g2_pokerusStrain,
-        g2_pokerusDaysRemaining,
-        g2_caughtDataTime,
-        g2_caughtDataLevel,
-        g2_caughtDataGender,
-        g2_caughtDataLocation,
+  protected:
+    static const DataVarInfo g2_heldItem, g2_friendship, g2_pokerusStrain, g2_pokerusDaysRemaining,
+        g2_caughtDataTime, g2_caughtDataLevel, g2_caughtDataGender, g2_caughtDataLocation,
         g2_currentHP;
 
 #if ON_GBA
