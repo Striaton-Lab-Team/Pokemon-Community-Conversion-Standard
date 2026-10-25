@@ -1072,7 +1072,7 @@ bool GBPokemon::convertEVs(Gen3Pokemon *newPkmn, ConversionMethod method)
             {
                 int sqrt = 1;
                 int statExp = getStatExp(Stat(i));
-                while((sqrt * sqrt) < statExp || statExp == 255)
+                while((sqrt * sqrt) < statExp)
                 {
                     sqrt += 1;
                 }

@@ -45,6 +45,10 @@ GBPokemon *PokeBox::getGBPokemon(int index)
 Gen3Pokemon *PokeBox::getGen3Pokemon(int index)
 {
     Pokemon *currPkmn = getPokemon(index);
+    if (currPkmn == nullMon)
+    {
+        return (Gen3Pokemon *)nullMon;
+    }
     Gen3Pokemon *currGen3Pkmn = (Gen3Pokemon *)currPkmn;
     currGen3Pkmn->updateSecurityData();
     return currGen3Pkmn;
